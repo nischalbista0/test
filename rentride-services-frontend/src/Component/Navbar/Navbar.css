@@ -1,0 +1,211 @@
+.NavbarItem {
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.25);
+  width: 98%;
+  height: 80px;
+  border-radius: 13px;
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 9999;
+}
+
+.image img {
+  height: 60px;
+  width: 100px;
+
+}
+
+
+
+.Navmenu {
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  grid-gap: 10px;
+  list-style: none;
+  align-items: center;
+}
+
+.NavLinks {
+  text-decoration: none;
+  color: black;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+
+.NavLinks i {
+  padding-right: 10px;
+}
+
+.NavLinks:hover {
+  background-color: black;
+  color: white;
+  border-radius: 4px;
+  transition: all o.2s ease-in-out;
+}
+
+.pop {
+  margin-top: -30px;
+}
+
+.MenuIcons {
+  display: none;
+}
+
+.corner-menu {
+  display: flex;
+  justify-content: space-between;
+  margin-right: 30px;
+
+}
+
+.corner-menu a {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  border: 2px solid black;
+  border-radius: 35px;
+  width: 40px;
+  height: 40px;
+
+}
+
+.corner-menu a:hover {
+
+
+  color: black;
+  background-color: lightgrey;
+
+}
+
+
+.Button {
+  margin-right: -20%;
+  margin-top: -1%;
+}
+
+.Button button {
+
+  display: inline-block;
+  height: 40px;
+  width: 40px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: #24262b solid 2px;
+  margin: 2px 20px 20px 0;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 50%;
+  color: #24262b;
+  transition: all 0.5s ease;
+
+}
+
+@media screen and (max-width: 840px) {
+  .Navmenu {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: white;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: -100%;
+    opacity: 0;
+    align-items: stretch;
+    padding: 80px 0 30px 0;
+    margin: 0;
+    transition: 0.3s ease-in-out;
+    border-radius: 13px;
+  }
+
+  .Navmenu.active {
+    left: 0;
+    opacity: 1;
+    z-index: -1;
+    transition: 0.3s ease-in-out;
+  }
+
+  .NavLinks {
+    display: block;
+    widows: 100%;
+    font-size: 1.2rem;
+    padding: 1rem;
+  }
+
+  .pop {
+    display: block;
+    widows: 100%;
+    margin-left: 43%;
+    padding: 2rem 0;
+
+  }
+
+  .NavLinks:hover {
+    background-color: black;
+    transition: none;
+  }
+
+  .NavbarItem {
+
+    z-index: 99;
+  }
+
+  .MenuIcons {
+    display: block;
+    cursor: pointer;
+    margin-right: -90%;
+  }
+
+  li {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .MenuIcons i {
+    font-size: 1.2rem;
+  }
+
+}
+
+@media screen and (max-width: 600px) {
+
+  .MenuIcons {
+    display: block;
+    cursor: pointer;
+
+  }
+
+  .corner-menu {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 60px;
+
+  }
+
+  .corner-menu a {
+    width: 35px;
+    height: 35px;
+  }
+
+  .button button {
+    height: 35px;
+    width: 35px;
+
+  }
+
+  .pop {
+    margin-left: 35%;
+
+  }
+
+}

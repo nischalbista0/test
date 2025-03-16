@@ -1,0 +1,192 @@
+    .v-main {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 20px;
+        list-style: none;
+        align-items: center;
+        justify-items: center;
+        /* background-color: black; */
+        padding: 20px;
+
+    }
+
+    .V-heading {
+        color: Black;
+        text-align: center;
+        margin-top: 10%;
+        margin-bottom: 2%;
+    }
+
+    .V-heading {
+        color: Black;
+        justify-content: center;
+        margin-top: 10%;
+        width: 100%;
+        margin-bottom: 2%;
+        display: flex;
+    }
+
+
+    .VLink a {
+        color: aliceblue;
+        text-decoration: none;
+    }
+
+    .VLink a:hover {
+        color: Black;
+    }
+
+    .VLink {
+        background-color: black;
+        width: 8%;
+        height: 30px;
+        margin-left: 2px;
+        border: 2px solid white;
+        border-radius: 20px;
+        padding: 5px 2px 1px 0;
+    }
+
+    .VLink:hover {
+        background-color: white;
+        border: 2px solid Black;
+    }
+
+
+    .v-inner {
+        max-width: 700px;
+        height: 425px;
+        width: 100%;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        padding: 20px;
+        border-radius: 10px;
+        justify-content: space-between;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    }
+
+    .v-first {
+        height: 375px;
+        width: 55%;
+        padding: 5px;
+        background-color: black;
+        display: grid;
+        border-radius: 10px;
+
+
+    }
+
+    .v-first img {
+        height: 220px;
+        width: 100%;
+        float: left;
+        border-radius: 8px;
+
+    }
+
+    .v-second {
+        margin-left: 5px;
+        height: 375px;
+        width: 45%;
+        border-radius: 10px;
+
+
+    }
+
+    .v-button a {
+        color: aliceblue;
+        text-decoration: none;
+    }
+
+    .v-button a:hover {
+        color: Black;
+    }
+
+    .v-button {
+        background-color: black;
+        width: 30%;
+        height: 25px;
+        margin-left: 35%;
+        border: 2px solid white;
+        border-radius: 20px;
+    }
+
+    .v-button:hover {
+        background-color: white;
+        border: 2px solid Black;
+    }
+
+
+
+
+    .v-inner1 {
+        height: 400px;
+        width: 50%;
+        padding: 5px;
+        background-color: white;
+        display: flex;
+        padding: 10px;
+        border-radius: 10px;
+
+    }
+
+    .v-first1 {
+        height: 375px;
+        width: 55%;
+        padding: 2px;
+        background-color: Grey;
+        display: grid;
+        border-radius: 10px;
+
+
+    }
+
+    .v-first1 img {
+        height: 200px;
+        width: 100%;
+        float: left;
+        border-radius: 8px;
+
+    }
+
+    .v-second1 {
+        margin-left: 5px;
+        height: 375px;
+        width: 45%;
+        border-radius: 10px;
+
+
+    }
+
+    .v-button1 a {
+        color: aliceblue;
+        text-decoration: none;
+    }
+
+    .v-button1 a:hover {
+        color: Black;
+    }
+
+    .v-button1 {
+        background-color: black;
+        width: 30%;
+        height: 25px;
+        margin-left: 35%;
+        border: 2px solid white;
+        border-radius: 20px;
+    }
+
+    .v-button1:hover {
+        background-color: white;
+        border: 2px solid Black;
+    }
+
+
+
+    @media screen and (max-width: 900px) {
+        .V-main {
+            grid-template-columns: 1fr;
+            /* Single column layout for smaller screens */
+        }
+    }
