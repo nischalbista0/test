@@ -2,10 +2,9 @@ require("dotenv").config();
 const bcryptjs = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const User = require("../models/user");
-const {
-  getToken,
-  getRefreshToken,
-} = require("../utlis/authenticate");
+const Vehicle = require("../models/vehicleModel");
+const Bookings = require("../models/bookingModel");
+const { getToken, getRefreshToken } = require("../utlis/authenticate");
 const jwt = require("jsonwebtoken");
 
 exports.signup = async (req, res, next) => {
@@ -136,7 +135,6 @@ exports.token = async (req, res, next) => {
   });
 };
 
-
 //change when you know old password
 exports.changePassword = async (req, res, next) => {
   try {
@@ -177,5 +175,47 @@ exports.logout = (req, res, next) => {
     res.status(200).json("User has been logged out");
   } catch (error) {
     next(error);
+  }
+};
+exports.getDashboardSummary = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({ role: "user" });
+    const totalAdmins = await User.countDocuments({ role: "admin" });
+    const totalVehicles = await Vehicle.countDocuments();
+    const totalBookedVehicles = await Vehicle.countDocuments({
+      availability: false,
+    });
+    const totalAvailableVehicles = await Vehicle.countDocuments({
+      availability: true,
+    });
+
+    // New Metrics from Bookings
+    const totalBookings = await Bookings.countDocuments();
+    const totalRevenue = await Bookings.aggregate([
+      { $group: { _id: null, total: { $sum: "Rs.price" } } },
+    ]);
+
+    const upcomingCheckouts = await Bookings.countDocuments({
+      checkOutDate: { $gte: new Date() },
+    });
+
+    const recentBookings = await Bookings.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("userName email model checkOutDate price");
+
+    res.json({
+      totalUsers,
+      totalAdmins,
+      totalVehicles,
+      totalBookedVehicles,
+      totalAvailableVehicles,
+      totalBookings,
+      totalRevenue: totalRevenue.length > 0 ? totalRevenue[0].total : 0,
+      upcomingCheckouts,
+      recentBookings,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

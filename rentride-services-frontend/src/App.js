@@ -24,6 +24,7 @@ import Admin_Booking from "./Component/Admin/Admin_Booking";
 import Admin_Checkout from "./Component/Admin/Admin_Checkout";
 import Footer from "./Component/Footer/Footer";
 import Search from "./Component/Search/Search";
+import AdminDashboard from "./Component/Admin/AdminDashboard";
 
 const App = () => {
   return (
@@ -49,6 +50,7 @@ const App = () => {
         <Route path="/AdminBooking" element={<Admin_Booking />} />
         <Route path="/AdminCheckout" element={<Admin_Checkout />} />
         <Route path="/AdminVehicle" element={<AdminVehicle />} />
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
         <Route path="/changePassword" element={<ChangePassword />} />

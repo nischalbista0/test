@@ -173,7 +173,7 @@ const AdminVehicle = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-[calc(100vh-320px)]">
       <AdminNav />
       <div className="V-heading">
         <button
@@ -309,7 +309,7 @@ const AdminVehicle = () => {
                 />
                 <div>
                   <p className="text-l font-semibold">Price</p>
-                  <span className="text-xs font-semibold">($ / Day)</span>
+                  <span className="text-xs font-semibold">(Rs. / Day)</span>
                 </div>
               </div>
             </div>

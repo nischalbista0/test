@@ -13,12 +13,9 @@ export default function Admin_Booking() {
         credentials: "include",
       });
       const responseData = await response.json();
-      console.log(responseData);
       setVehicles(responseData.Bookings);
     } catch (error) {
-      toast.error("You are not admin", {
-        position: "top-right",
-      });
+      toast.error("You are not admin", { position: "top-right" });
       navigate("/");
       console.error(error);
     }
@@ -29,48 +26,65 @@ export default function Admin_Booking() {
   }, []);
 
   return (
-    <>
+    <div className="min-h-[calc(100vh-170px)] bg-gray-100">
       <AdminNav />
-      <div className="V-heading font-bold text-xxl ">Vehicle Booking list</div>
-      <table className="w-full my-12 p-6">
-        <thead>
-          <tr className="shadow-lg border-black border-4 rounded-xxl  ">
-            <th>checkOutDate</th>
-            <th>Contact</th>
-            <th>Description</th>
-            <th>email</th>
-            <th>model</th>
-            <th>Price/Per day</th>
-            <th>userName</th>
-            <th>vehicleId</th>
-          </tr>
-        </thead>
-        <tbody>
-          {vehicles.length > 0 ? (
-            vehicles.map((vehicle, index) => (
-              <tr
-                className="shadow-lg text-center border-black border-1 rounded-xxl"
-                key={index}
-              >
-                <td>{vehicle.checkOutDate}</td>
-                <td>{vehicle.contact}</td>
-                <td>{vehicle.description}</td>
-                <td>{vehicle.email}</td>
-                <td>{vehicle.model}</td>
-                <td>{vehicle.price}</td>
-                <td>{vehicle.userName}</td>
-                <td>{vehicle.vehicleId}</td>
+      <div className="px-6 py-10">
+        <h1 className="text-3xl font-bold text-gray-800 mt-[90px] mb-6">
+          Vehicle Booking List
+        </h1>
+
+        <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+          <table className="w-full border-collapse">
+            {/* Table Header */}
+            <thead>
+              <tr className="bg-blue-500 text-white text-left text-sm md:text-base font-semibold">
+                <th className="p-4">Checkout Date</th>
+                <th className="p-4">Contact</th>
+                <th className="p-4">Description</th>
+                <th className="p-4">Email</th>
+                <th className="p-4">Model</th>
+                <th className="p-4">Price/Day</th>
+                <th className="p-4">User</th>
+                <th className="p-4">Vehicle ID</th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="7" className="text-center">
-                No bookings found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </>
+            </thead>
+
+            {/* Table Body */}
+            <tbody>
+              {vehicles.length > 0 ? (
+                vehicles.map((vehicle, index) => (
+                  <tr
+                    key={index}
+                    className="border-b hover:bg-gray-100 transition-all text-gray-700 text-sm md:text-base"
+                  >
+                    <td className="p-4">
+                      {new Date(vehicle.checkOutDate).toLocaleDateString()}
+                    </td>
+                    <td className="p-4">{vehicle.contact}</td>
+                    <td className="p-4">{vehicle.description}</td>
+                    <td className="p-4">{vehicle.email}</td>
+                    <td className="p-4">{vehicle.model}</td>
+                    <td className="p-4 font-bold text-green-600">
+                      Rs. {vehicle.price}
+                    </td>
+                    <td className="p-4">{vehicle.userName}</td>
+                    <td className="p-4">{vehicle.vehicleId}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="8"
+                    className="text-center p-6 text-gray-500 italic"
+                  >
+                    No bookings found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

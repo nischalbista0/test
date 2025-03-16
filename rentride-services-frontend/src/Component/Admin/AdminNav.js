@@ -23,6 +23,11 @@ const Navbar = () => {
 
         <ul className={isMenuOpen ? "Navmenu active" : "Navmenu"}>
           <li>
+            <Link className="NavLinks" to="/AdminDashboard">
+              <i className="fas fa-chart-line"></i>Dashboard
+            </Link>
+          </li>
+          <li>
             <Link className="NavLinks" to="/AdminVehicle">
               <i className="fas fa-car"></i>Vehicle
             </Link>

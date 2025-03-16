@@ -18,7 +18,7 @@ router.get("/checkAdmin", validateAdmin(), (req, res) => {
     res.status(403).json({ userRole, message: "User is not admin" });
   }
 });
-// Route for user change Password 
+// Route for user change Password
 router.post("/changePassword", userController.changePassword);
 
 // Route for generating new token once the token is expires
@@ -26,5 +26,7 @@ router.post("/token", userController.token);
 
 // Route for user logout
 router.get("/logout", userController.logout);
+
+router.get("/getDashboard", userController.getDashboardSummary);
 
 module.exports = router;
