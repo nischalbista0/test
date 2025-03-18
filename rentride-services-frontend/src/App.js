@@ -21,10 +21,13 @@ import ResetForm from "./Component/resetForm";
 import Comparision from "./Component/Comparision/Comparision";
 import Success from "./Component/Khalti/KhaltiSuccess";
 import Admin_Booking from "./Component/Admin/Admin_Booking";
-import Admin_Checkout from "./Component/Admin/Admin_Checkout";
 import Footer from "./Component/Footer/Footer";
 import Search from "./Component/Search/Search";
 import AdminDashboard from "./Component/Admin/AdminDashboard";
+import AdminStaffs from "./Component/Admin/AdminStaffs";
+import StaffBooking from "./Component/Staffs/StaffBooking";
+import StaffNav from "./Component/Staffs/StaffNav";
+import StaffVehicle from "./Component/Staffs/StaffVehicle";
 
 const App = () => {
   return (
@@ -48,14 +51,17 @@ const App = () => {
 
         <Route path="/cart" element={<CartPage />} />
         <Route path="/AdminBooking" element={<Admin_Booking />} />
-        <Route path="/AdminCheckout" element={<Admin_Checkout />} />
         <Route path="/AdminVehicle" element={<AdminVehicle />} />
         <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/AdminStaffs" element={<AdminStaffs />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
         <Route path="/changePassword" element={<ChangePassword />} />
         <Route path="/khaltiSuccess" element={<Success />} />
         <Route path="/Booking" element={<Booking />} />
+
+        <Route path="/StaffBooking" element={<StaffBooking />} />
+        <Route path="/StaffVehicle" element={<StaffVehicle />} />
         {/* </Route> */}
       </Routes>
       <ToastContainer />

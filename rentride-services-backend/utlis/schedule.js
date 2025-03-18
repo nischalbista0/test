@@ -22,10 +22,8 @@ const availabilityUpdate = schedule.scheduleJob("06 23 * * *", async () => {
         { $set: { availability: true } }
       );
     }
-
-    console.log("Room availability updated successfully");
   } catch (error) {
-    console.error("Error updating room availability:", error);
+    console.error("Error updating availability:", error);
   }
 });
 

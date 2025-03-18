@@ -11,7 +11,6 @@ const vehicleRoutes = require("./routes/vehicleRoutes");
 const userRoutes = require("./routes/userRoutes");
 const availabilityUpdate = require("./utlis/schedule");
 const khaltiRoutes = require("./routes/khaltiRoutes");
-const checkoutRoutes = require("./routes/checkoutRoute");
 const whitelist = process.env.WHITELISTED_DOMAINS;
 
 const app = express();
@@ -39,7 +38,6 @@ app.use(userRoutes);
 app.use(vehicleRoutes);
 app.use(bookingRoutes);
 app.use(khaltiRoutes);
-app.use(checkoutRoutes);
 
 //Database Connection
 mongoose

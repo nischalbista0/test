@@ -18,6 +18,7 @@ router.get("/checkAdmin", validateAdmin(), (req, res) => {
     res.status(403).json({ userRole, message: "User is not admin" });
   }
 });
+router.post("/passwordReset", userController.passwordReset);
 // Route for user change Password
 router.post("/changePassword", userController.changePassword);
 
@@ -28,5 +29,15 @@ router.post("/token", userController.token);
 router.get("/logout", userController.logout);
 
 router.get("/getDashboard", userController.getDashboardSummary);
+
+router.get("/getStaffs", userController.getStaffs);
+
+router.post("/addStaff", validateAdmin(), userController.addStaff);
+
+router.delete(
+  "/deleteStaff/:staffId",
+  validateAdmin(),
+  userController.deleteStaff
+);
 
 module.exports = router;

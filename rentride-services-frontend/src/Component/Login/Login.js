@@ -39,8 +39,6 @@ function Login() {
       });
       const data = await response.json();
 
-      console.log(response, "re");
-      console.log(data, "reda");
       setMessage(data.message);
 
       if (!response.ok) {
@@ -58,6 +56,8 @@ function Login() {
 
       if (data.role === "admin") {
         navigate("/AdminBooking");
+      } else if (data.role === "staff") {
+        navigate("/StaffBooking");
       } else {
         navigate("/");
       }

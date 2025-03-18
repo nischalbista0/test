@@ -13,6 +13,26 @@ const ForgotPassword = () => {
 
   const navigate = useNavigate();
 
+  const submitAlbum = async (data) => {
+    try {
+      const response = await fetch("http://localhost:8081/passwordReset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      console.log(response, "res");
+
+      if (response.message !== null) {
+        console.log("Mail sent");
+      } else {
+        console.error("mail send failed");
+      }
+      reset();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -20,7 +40,7 @@ const ForgotPassword = () => {
         <div className="wrapper">
           <h1 className="font-semibold">Enter new Password</h1>
 
-          <form >
+          <form onSubmit={handleSubmit(submitAlbum)}>
             <div className=" input-box">
               <input
                 {...register("email", { required: true })}

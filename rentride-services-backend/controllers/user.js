@@ -4,8 +4,13 @@ const { validationResult } = require("express-validator");
 const User = require("../models/user");
 const Vehicle = require("../models/vehicleModel");
 const Bookings = require("../models/bookingModel");
-const { getToken, getRefreshToken } = require("../utlis/authenticate");
+const {
+  getToken,
+  getRefreshToken,
+  getPasswordResetToken,
+} = require("../utlis/authenticate");
 const jwt = require("jsonwebtoken");
+const sendPasswordResetMail = require("../utlis/mail");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -135,6 +140,21 @@ exports.token = async (req, res, next) => {
   });
 };
 
+exports.passwordReset = async (req, res, next) => {
+  const email = req.body.email;
+  console.log(email, "data");
+
+  const user = await User.findOne({ email: email });
+  console.log(email, user, "data");
+
+  if (!user) return res.sendStatus(401);
+  const passwordResetToken = getPasswordResetToken({ _id: user._id });
+  console.log(passwordResetToken, "resettoken");
+
+  sendPasswordResetMail(passwordResetToken, email);
+  res.status(200).json({ message: "Message sent" });
+};
+
 //change when you know old password
 exports.changePassword = async (req, res, next) => {
   try {
@@ -192,7 +212,7 @@ exports.getDashboardSummary = async (req, res) => {
     // New Metrics from Bookings
     const totalBookings = await Bookings.countDocuments();
     const totalRevenue = await Bookings.aggregate([
-      { $group: { _id: null, total: { $sum: "Rs.price" } } },
+      { $group: { _id: null, total: { $sum: "$price" } } },
     ]);
 
     const upcomingCheckouts = await Bookings.countDocuments({
@@ -217,5 +237,78 @@ exports.getDashboardSummary = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getStaffs = async (req, res, next) => {
+  try {
+    const staffs = await User.find({ role: "staff" });
+
+    if (!staffs.length) {
+      return res.status(404).json({ message: "No staff members found." });
+    }
+
+    const staffList = staffs.map(
+      ({ password, ...staffData }) => staffData._doc
+    );
+
+    res.status(200).json({
+      message: "Staff members fetched successfully.",
+      staffs: staffList,
+    });
+  } catch (error) {
+    console.error("Error fetching staff:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+    next(error);
+  }
+};
+
+exports.addStaff = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ message: errors.array()[0].msg });
+    }
+
+    const { userName, email, password } = req.body;
+    const userExist = await User.findOne({ email });
+
+    if (userExist) {
+      return res.status(400).json({ message: "Staff member already exists" });
+    }
+
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+
+    const newStaff = new User({
+      userName,
+      email,
+      password: hashedPassword,
+      role: "staff",
+    });
+
+    await newStaff.save();
+
+    res
+      .status(201)
+      .json({ message: "Staff added successfully", staff: newStaff });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteStaff = async (req, res, next) => {
+  try {
+    const { staffId } = req.params;
+    const staff = await User.findById(staffId);
+
+    if (!staff || staff.role !== "staff") {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    await User.findByIdAndDelete(staffId);
+
+    res.status(200).json({ message: "Staff deleted successfully" });
+  } catch (error) {
+    next(error);
   }
 };
