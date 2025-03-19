@@ -8,7 +8,6 @@ const sendBookingMail = require("../utlis/mail");
 exports.createBooking = async (req, res, next) => {
   try {
     const booking = await Booking.create(req.body);
-    console.log(req.body);
     await Vehicle.updateOne(
       {
         _id: req.body.vehicleId,

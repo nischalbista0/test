@@ -21,13 +21,6 @@ const ForgotPassword = () => {
         body: JSON.stringify(data),
       });
 
-      console.log(response, "res");
-
-      if (response.message !== null) {
-        console.log("Mail sent");
-      } else {
-        console.error("mail send failed");
-      }
       reset();
     } catch (error) {
       console.log(error);

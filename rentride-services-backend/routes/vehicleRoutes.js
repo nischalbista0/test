@@ -12,4 +12,9 @@ router.post("/addReviewV", Vehicle.addReview);
 router.get("/admin/getVehicle", Vehicle.getVehicle);
 router.get("/getVehicle", Vehicle.getVehicle);
 
+router.put("/admin/vehicle/:vehicleId", Vehicle.updateVehicle);
+
+// Remove a product
+router.delete("/Vehicle/:vehicleId", Vehicle.deleteVehicle);
+
 module.exports = router;

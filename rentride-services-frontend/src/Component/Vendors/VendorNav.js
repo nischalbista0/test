@@ -4,7 +4,7 @@ import { FaArrowRight, FaUser } from "react-icons/fa";
 import "../Navbar/Navbar.css";
 import { useSelector } from "react-redux";
 
-const StaffNav = () => {
+const VendorNav = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useSelector((state) => state.user);
 
@@ -22,12 +22,12 @@ const StaffNav = () => {
 
         <ul className={isMenuOpen ? "Navmenu active" : "Navmenu"}>
           <li>
-            <Link className="NavLinks" to="/StaffVehicle">
+            <Link className="NavLinks" to="/VendorVehicle">
               <i className="fas fa-car"></i>Vehicle
             </Link>
           </li>
           <li>
-            <Link className="NavLinks" to="/StaffBooking">
+            <Link className="NavLinks" to="/VendorBooking">
               <i className="fas fa-list"></i>Bookings
             </Link>
           </li>
@@ -49,4 +49,4 @@ const StaffNav = () => {
   );
 };
 
-export default StaffNav;
+export default VendorNav;

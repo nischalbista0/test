@@ -12,7 +12,6 @@ import { toast } from "react-toastify";
 
 function Login() {
   const { user, loading, error } = useSelector((state) => state.user);
-  console.log(user, "usero");
   const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
@@ -56,8 +55,8 @@ function Login() {
 
       if (data.role === "admin") {
         navigate("/AdminBooking");
-      } else if (data.role === "staff") {
-        navigate("/StaffBooking");
+      } else if (data.role === "vendor") {
+        navigate("/VendorBooking");
       } else {
         navigate("/");
       }

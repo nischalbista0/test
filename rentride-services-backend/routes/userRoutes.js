@@ -10,7 +10,6 @@ router.post("/login", userController.login);
 router.get("/fetchUser", userController.fetchUser);
 
 router.get("/checkAdmin", validateAdmin(), (req, res) => {
-  console.log(req.userRole, "up[puo");
   const userRole = req.userRole;
   if (userRole === "user") {
     res.status(200).json({ userRole, message: "User is admin" });
@@ -30,14 +29,14 @@ router.get("/logout", userController.logout);
 
 router.get("/getDashboard", userController.getDashboardSummary);
 
-router.get("/getStaffs", userController.getStaffs);
+router.get("/getVendors", userController.getVendors);
 
-router.post("/addStaff", validateAdmin(), userController.addStaff);
+router.post("/addVendor", validateAdmin(), userController.addVendor);
 
 router.delete(
-  "/deleteStaff/:staffId",
+  "/deleteVendor/:vendorId",
   validateAdmin(),
-  userController.deleteStaff
+  userController.deleteVendor
 );
 
 module.exports = router;

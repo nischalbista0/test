@@ -37,8 +37,6 @@ const Success = () => {
             navigate("/Booking");
           } else if (purpose === "product") {
             navigate("/cart");
-          } else {
-            console.log("buwa");
           }
         } else {
           dispatch(payementFailure());

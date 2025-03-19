@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import "./Staff_Vehicle.css";
-import StaffNav from "./StaffNav";
+import "./Vendor_Vehicle.css";
+import VendorNav from "./VendorNav";
 
-const StaffVehicle = () => {
+const VendorVehicle = () => {
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [brand, setBrand] = useState("");
@@ -174,7 +174,7 @@ const StaffVehicle = () => {
 
   return (
     <div className="min-h-[calc(100vh-320px)]">
-      <StaffNav />
+      <VendorNav />
       <div className="V-heading">
         <button
           onClick={() => setshowButton(true)}
@@ -415,4 +415,4 @@ const StaffVehicle = () => {
   );
 };
 
-export default StaffVehicle;
+export default VendorVehicle;

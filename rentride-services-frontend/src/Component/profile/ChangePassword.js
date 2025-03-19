@@ -50,7 +50,6 @@ const ChangePassword = () => {
       });
 
       const responseData = await response.json();
-      // console.log(responseData, "response data");
       toast.success("Password changed successfully!");
       reset();
     } catch (error) {

@@ -79,15 +79,11 @@ const Vehicle = () => {
     } else {
       let hasReviewForVehicle = false;
       prevReserve.forEach((reserve) => {
-        console.log(reserve.vehicleId);
-        console.log(vehicleId);
         if (reserve.vehicleId === vehicleId) {
           hasReviewForVehicle = true;
           return;
         }
       });
-
-      console.log(hasReviewForVehicle);
 
       if (!user) {
         toast.error("Please login to add review", {

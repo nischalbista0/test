@@ -14,7 +14,6 @@ const availabilityUpdate = schedule.scheduleJob("06 23 * * *", async () => {
       checkOutDate: { $lt: currentDate },
     });
 
-    console.log(pastReservations, "resr");
     // Update vehicle availability to true for each reservation
     for (const Booking of pastReservations) {
       await Vehicle.updateOne(

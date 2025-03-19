@@ -18,7 +18,6 @@ exports.khaltiApi = async (req, res) => {
       }
     );
     const responseData = await response.json();
-    console.log(responseData);
     return res.status(201).json(responseData);
   } catch (error) {
     console.error(error);
@@ -27,7 +26,6 @@ exports.khaltiApi = async (req, res) => {
 
 exports.khaltiSuccess = async (req, res) => {
   const pidx = req.body || { pidx: "PkdvYFZXKybbGLVHBhxgTW" };
-  console.log(pidx, "P");
   const respo = await fetch(`https://a.khalti.com/api/v2/epayment/lookup/`, {
     method: "POST",
     headers: {
@@ -39,6 +37,5 @@ exports.khaltiSuccess = async (req, res) => {
     credentials: "include",
   });
   const responseData = await respo.json();
-  console.log(responseData, "rs");
   return res.status(201).json(responseData);
 };

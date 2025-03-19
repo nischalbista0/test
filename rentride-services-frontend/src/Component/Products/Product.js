@@ -9,7 +9,6 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const Product = () => {
   const { user } = useSelector((state) => state.user);
-  console.log(user, "data");
   const [page, setPage] = useState(1);
   const [cart, setCart] = useCart();
   const [review, setReview] = useState(false);
@@ -174,8 +173,8 @@ const Product = () => {
                 <br />
 
                 <button
-                    className="bg-black text-white border-2 border-gray-500 hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
-                    onClick={() => {
+                  className="bg-black text-white border-2 border-gray-500 hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
+                  onClick={() => {
                     handleViewDetails(x); // Call function to view product details in popup
                   }}
                 >

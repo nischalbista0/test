@@ -4,7 +4,6 @@ import Navbar from "../Navbar/Navbar";
 
 const History = () => {
   const { user } = useSelector((state) => state.user);
-  console.log(user, "data");
   const [bookingData, setBookingData] = useState(null);
 
   useEffect(() => {
@@ -26,7 +25,6 @@ const History = () => {
   const reqBooking = bookingData?.Bookings?.filter(
     (booking) => user && user.rest && booking.email === user.rest.email
   );
-  console.log(reqBooking, "dd");
 
   return (
     <div>

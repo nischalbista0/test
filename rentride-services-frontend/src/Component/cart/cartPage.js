@@ -82,7 +82,6 @@ const CartPage = () => {
       email: user.rest.email,
     };
 
-    console.log(requestBody, "body");
     dispatch(reservationStart());
     dispatch(reservationSuccess(requestBody));
     setKhalti(true);

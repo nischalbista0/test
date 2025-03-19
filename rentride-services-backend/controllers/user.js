@@ -142,14 +142,11 @@ exports.token = async (req, res, next) => {
 
 exports.passwordReset = async (req, res, next) => {
   const email = req.body.email;
-  console.log(email, "data");
 
   const user = await User.findOne({ email: email });
-  console.log(email, user, "data");
 
   if (!user) return res.sendStatus(401);
   const passwordResetToken = getPasswordResetToken({ _id: user._id });
-  console.log(passwordResetToken, "resettoken");
 
   sendPasswordResetMail(passwordResetToken, email);
   res.status(200).json({ message: "Message sent" });
@@ -159,7 +156,6 @@ exports.passwordReset = async (req, res, next) => {
 exports.changePassword = async (req, res, next) => {
   try {
     //find the user
-    console.log("herre");
     const email = req.body.email;
     const user = await User.findOne({ email: email });
 
@@ -240,74 +236,69 @@ exports.getDashboardSummary = async (req, res) => {
   }
 };
 
-exports.getStaffs = async (req, res, next) => {
+exports.getVendors = async (req, res, next) => {
   try {
-    const staffs = await User.find({ role: "staff" });
+    const vendors = await User.find({ role: "vendor" });
 
-    if (!staffs.length) {
-      return res.status(404).json({ message: "No staff members found." });
+    if (!vendors.length) {
+      return res.status(404).json({ message: "No vendor members found." });
     }
 
-    const staffList = staffs.map(
-      ({ password, ...staffData }) => staffData._doc
+    const vendorList = vendors.map(
+      ({ password, ...vendorData }) => vendorData._doc
     );
 
     res.status(200).json({
-      message: "Staff members fetched successfully.",
-      staffs: staffList,
+      message: "Vendor members fetched successfully.",
+      vendors: vendorList,
     });
   } catch (error) {
-    console.error("Error fetching staff:", error);
+    console.error("Error fetching vendor:", error);
     res.status(500).json({ error: "Internal Server Error" });
     next(error);
   }
 };
 
-exports.addStaff = async (req, res, next) => {
+exports.addVendor = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ message: errors.array()[0].msg });
-    }
-
     const { userName, email, password } = req.body;
     const userExist = await User.findOne({ email });
 
     if (userExist) {
-      return res.status(400).json({ message: "Staff member already exists" });
+      return res.status(400).json({ message: "Vendor member already exists" });
     }
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
-    const newStaff = new User({
+    const newVendor = new User({
       userName,
       email,
       password: hashedPassword,
-      role: "staff",
+      role: "vendor",
     });
 
-    await newStaff.save();
+    await newVendor.save();
 
     res
       .status(201)
-      .json({ message: "Staff added successfully", staff: newStaff });
+      .json({ message: "Vendor added successfully", vendor: newVendor });
   } catch (error) {
     next(error);
   }
 };
 
-exports.deleteStaff = async (req, res, next) => {
+exports.deleteVendor = async (req, res, next) => {
   try {
-    const { staffId } = req.params;
-    const staff = await User.findById(staffId);
+    const { vendorId } = req.params;
+    const vendor = await User.findById(vendorId);
 
-    if (!staff || staff.role !== "staff") {
-      return res.status(404).json({ message: "Staff member not found" });
+    if (!vendor || vendor.role !== "vendor") {
+      return res.status(404).json({ message: "Vendor member not found" });
     }
 
-    await User.findByIdAndDelete(staffId);
+    await User.findByIdAndDelete(vendorId);
 
-    res.status(200).json({ message: "Staff deleted successfully" });
+    res.status(200).json({ message: "Vendor deleted successfully" });
   } catch (error) {
     next(error);
   }

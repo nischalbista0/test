@@ -4,58 +4,62 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaTrashAlt, FaUserPlus, FaUsers } from "react-icons/fa";
 
-const AdminStaffs = () => {
-  const [staffs, setStaffs] = useState([]);
+const AdminVendors = () => {
+  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newStaff, setNewStaff] = useState({
+  const [newVendor, setNewVendor] = useState({
     name: "",
     email: "",
     password: "",
   });
 
   useEffect(() => {
-    const fetchStaffs = async () => {
+    const fetchVendors = async () => {
       try {
-        const response = await fetch("http://localhost:8081/getStaffs", {
+        const response = await fetch("http://localhost:8081/getVendors", {
           credentials: "include",
         });
         const data = await response.json();
-        setStaffs(data.staffs);
+        setVendors(data.vendors);
       } catch (error) {
-        toast.error("Failed to load staff members.");
+        toast.error("Failed to load vendor members.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStaffs();
+    fetchVendors();
   }, []);
 
-  const handleAddStaff = async (e) => {
+  const handleAddVendor = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8081/addStaff", {
+      const response = await fetch("http://localhost:8081/addVendor", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newStaff),
+        body: JSON.stringify(newVendor),
       });
 
       const data = await response.json();
-      setStaffs([...staffs, data]);
-      setNewStaff({ name: "", email: "", password: "" });
-      toast.success("Staff added successfully!");
+      if (data.message === "Vendor member already exists") {
+        toast.error("Vendor member already exists");
+        return;
+      }
+      // setVendors([...vendors, data]);
+      // setNewVendor({ name: "", email: "", password: "" });
+      toast.success("Vendor added successfully!");
 
       window.location.reload();
     } catch (error) {
-      toast.error("Failed to add staff.");
+      toast.error("Failed to add vendor.");
     }
   };
 
-  const handleDeleteStaff = async (staffId) => {
+  const handleDeleteVendor = async (vendorId) => {
     try {
       const response = await fetch(
-        `http://localhost:8081/deleteStaff/${staffId}`,
+        `http://localhost:8081/deleteVendor/${vendorId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -63,13 +67,13 @@ const AdminStaffs = () => {
       );
 
       if (response.ok) {
-        setStaffs(staffs.filter((staff) => staff._id !== staffId));
-        toast.success("Staff deleted successfully!");
+        setVendors(vendors.filter((vendor) => vendor._id !== vendorId));
+        toast.success("Vendor deleted successfully!");
       } else {
-        toast.error("Failed to delete staff.");
+        toast.error("Failed to delete vendor.");
       }
     } catch (error) {
-      toast.error("Failed to delete staff.");
+      toast.error("Failed to delete vendor.");
     }
   };
 
@@ -85,16 +89,16 @@ const AdminStaffs = () => {
         ) : (
           <>
             <h2 className="text-3xl font-bold text-gray-800 mb-8">
-              Staff Management
+              Vendor Management
             </h2>
 
-            {/* Add Staff Form */}
+            {/* Add Vendor Form */}
             <div className="mb-8 p-6 bg-white rounded-lg shadow-lg">
               <h3 className="text-2xl font-semibold mb-6 flex items-center gap-3">
-                <FaUserPlus className="text-blue-500 text-3xl" /> Add New Staff
+                <FaUserPlus className="text-blue-500 text-3xl" /> Add New Vendor
               </h3>
 
-              <form onSubmit={handleAddStaff} className="space-y-6">
+              <form onSubmit={handleAddVendor} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col">
                     <label
@@ -107,9 +111,9 @@ const AdminStaffs = () => {
                       id="name"
                       type="text"
                       placeholder="Enter Username"
-                      value={newStaff.name}
+                      value={newVendor.name}
                       onChange={(e) =>
-                        setNewStaff({ ...newStaff, name: e.target.value })
+                        setNewVendor({ ...newVendor, name: e.target.value })
                       }
                       className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
                       required
@@ -127,9 +131,9 @@ const AdminStaffs = () => {
                       id="email"
                       type="email"
                       placeholder="Enter Email Address"
-                      value={newStaff.email}
+                      value={newVendor.email}
                       onChange={(e) =>
-                        setNewStaff({ ...newStaff, email: e.target.value })
+                        setNewVendor({ ...newVendor, email: e.target.value })
                       }
                       className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
                       required
@@ -148,9 +152,9 @@ const AdminStaffs = () => {
                     id="password"
                     type="password"
                     placeholder="Enter Password"
-                    value={newStaff.password}
+                    value={newVendor.password}
                     onChange={(e) =>
-                      setNewStaff({ ...newStaff, password: e.target.value })
+                      setNewVendor({ ...newVendor, password: e.target.value })
                     }
                     className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
                     required
@@ -161,26 +165,26 @@ const AdminStaffs = () => {
                   type="submit"
                   className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300 focus:ring-2 focus:ring-blue-300"
                 >
-                  Add Staff
+                  Add Vendor
                 </button>
               </form>
             </div>
 
             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <FaUsers className="text-blue-500" /> Staff Members
+              <FaUsers className="text-blue-500" /> Vendor Members
             </h3>
 
-            {/* Staff List */}
+            {/* Vendor List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {staffs && staffs.length > 0 ? (
-                staffs.map((staff) => (
+              {vendors && vendors.length > 0 ? (
+                vendors.map((vendor) => (
                   <div
-                    key={staff._id}
+                    key={vendor._id}
                     className="p-5 bg-white rounded-lg shadow-lg flex flex-col items-center text-center relative"
                   >
-                    <p className="text-gray-600 text-sm">{staff.email}</p>
+                    <p className="text-gray-600 text-sm">{vendor.email}</p>
                     <button
-                      onClick={() => handleDeleteStaff(staff._id)}
+                      onClick={() => handleDeleteVendor(vendor._id)}
                       className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-300"
                     >
                       <FaTrashAlt />
@@ -189,7 +193,7 @@ const AdminStaffs = () => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center w-full">
-                  No staff members found.
+                  No vendor members found.
                 </p>
               )}
             </div>
@@ -200,4 +204,4 @@ const AdminStaffs = () => {
   );
 };
 
-export default AdminStaffs;
+export default AdminVendors;

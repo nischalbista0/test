@@ -50,8 +50,6 @@ export default function Booking({ price, model, onClose, id }) {
     }
   }, [paymentStatus]);
 
-  console.log(reservationStatus);
-
   const handleConfirmBooking = async () => {
     try {
       const response = await fetch("http://localhost:8081/createBooking", {

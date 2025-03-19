@@ -30,10 +30,7 @@ const ResetForm = () => {
         body: JSON.stringify(requestData),
       });
 
-      console.log(response, "res");
-
       if (response.message !== null) {
-        console.log("Password reset successful");
         alert("Password reset successful");
         navigate("/login");
       } else {

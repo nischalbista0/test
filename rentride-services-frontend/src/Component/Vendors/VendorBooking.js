@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import StaffNav from "./StaffNav";
+import VendorNav from "./VendorNav";
 
-export default function StaffBooking() {
+export default function VendorBooking() {
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState([]);
 
@@ -27,7 +27,7 @@ export default function StaffBooking() {
 
   return (
     <div className="min-h-[calc(100vh-170px)] bg-gray-100">
-      <StaffNav />
+      <VendorNav />
       <div className="px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-800 mt-[90px] mb-6">
           Vehicle Booking List

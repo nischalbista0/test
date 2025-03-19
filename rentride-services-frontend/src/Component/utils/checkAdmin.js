@@ -3,7 +3,6 @@ import { Route, Navigate } from "react-router-dom";
 
 const AdminVehicleRoute = ({ element, ...rest }) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  console.log("yers");
   useEffect(() => {
     const fetchAdminRole = async () => {
       try {
@@ -12,7 +11,6 @@ const AdminVehicleRoute = ({ element, ...rest }) => {
           credentials: "include",
         });
         const data = await response.json();
-        console.log(data.userRole, "dti");
         if (data.userRole === "user") {
           setIsAdmin(true);
         }

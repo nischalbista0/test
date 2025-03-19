@@ -43,8 +43,8 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link className="NavLinks" to="/AdminStaffs">
-              <i className="fas fa-users"></i>Staffs
+            <Link className="NavLinks" to="/AdminVendors">
+              <i className="fas fa-users"></i>Vendors
             </Link>
           </li>
           {/* <li>
