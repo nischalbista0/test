@@ -20,6 +20,8 @@ const VendorVehicle = () => {
   const [updateButton, setUpdateButton] = useState(false);
   const [showButton, setshowButton] = useState(false);
   const [vehicleId, setVehicleId] = useState("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   async function fetchVehicle() {
     try {
@@ -156,19 +158,31 @@ const VendorVehicle = () => {
   }
 
   // Delete a vehicle
-  async function remove(id) {
+  async function handleRemove() {
     try {
-      const response = await fetch(`http://localhost:8081/Vehicle/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8081/Vehicle/${selectedVehicleId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove vehicle");
+      }
+
       setVehicle((prevVehicleList) =>
-        prevVehicleList.filter((vehicle) => vehicle._id !== id)
+        prevVehicleList.filter((vehicle) => vehicle._id !== selectedVehicleId)
       );
+
+      toast.success("Vehicle removed successfully", { position: "top-right" });
+      setShowRemoveModal(false);
+      setSelectedVehicleId(null);
     } catch (error) {
       console.error(error);
+      toast.error("Error removing vehicle", { position: "top-right" });
     }
   }
 
@@ -369,7 +383,10 @@ const VendorVehicle = () => {
                     UPDATE
                   </a>
                   <a
-                    onClick={() => remove(x._id)}
+                    onClick={() => {
+                      setSelectedVehicleId(x._id);
+                      setShowRemoveModal(true);
+                    }}
                     className="bg-red-500 cursor-pointer text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
                   >
                     REMOVE
@@ -411,6 +428,29 @@ const VendorVehicle = () => {
           </h1>
         )}
       </div>
+
+      {showRemoveModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-bold mb-3">Confirm Removal</h2>
+            <p>Are you sure you want to remove this vehicle?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowRemoveModal(false)}
+                className="mr-3 px-4 py-2 bg-gray-300 text-black rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemove}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

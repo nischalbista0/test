@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaLock } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const ResetForm = () => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -30,10 +31,13 @@ const ResetForm = () => {
         body: JSON.stringify(requestData),
       });
 
-      if (response.message !== null) {
-        alert("Password reset successful");
+      console.log(response);
+
+      if (response.status === 200) {
+        // alert("Password reset successful");
         navigate("/login");
       } else {
+        toast.error("Password reset failed");
         console.error("Password reset failed");
       }
       reset();
@@ -70,7 +74,11 @@ const ResetForm = () => {
               {errors.confirmPassword && <p>confirmPassword is required</p>}
             </div>
 
-            <input className="loginbutton" type="submit" value="Submit" />
+            <input
+              className="w-full loginbutton cursor-pointer bg-black text-white px-4 py-3 font-bold rounded-full hover:bg-white hover:text-black"
+              type="submit"
+              value="Submit"
+            />
           </form>
         </div>
       </div>

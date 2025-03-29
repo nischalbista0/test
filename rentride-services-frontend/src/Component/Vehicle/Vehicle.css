@@ -10,6 +10,7 @@
 
     }
 
+
     .V-heading {
         color: Black;
         text-align: center;
@@ -54,7 +55,6 @@
 
     .v-inner {
         max-width: 700px;
-        height: 425px;
         width: 100%;
         background-color: white;
         display: flex;
@@ -66,8 +66,8 @@
 
     }
 
+
     .v-first {
-        height: 375px;
         width: 55%;
         padding: 5px;
         background-color: black;
@@ -78,7 +78,6 @@
     }
 
     .v-first img {
-        height: 220px;
         width: 100%;
         float: left;
         border-radius: 8px;
@@ -87,9 +86,27 @@
 
     .v-second {
         margin-left: 5px;
-        height: 375px;
         width: 45%;
         border-radius: 10px;
+
+
+    }
+
+
+
+    @media screen and (max-width: 900px) {
+        .v-main {
+            grid-template-columns: 1fr;
+        }
+
+        .v-inner {
+            flex-direction: column;
+        }
+
+        .v-first,
+        .v-second {
+            width: 100%;
+        }
 
 
     }

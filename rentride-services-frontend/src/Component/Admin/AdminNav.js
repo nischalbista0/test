@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { HashLink as Link } from "react-router-hash-link";
-import { FaArrowRight, FaUser } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import "../Navbar/Navbar.css";
 import { useSelector } from "react-redux";
-import Profile from "../profile/profile";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,11 +31,6 @@ const Navbar = () => {
               <i className="fas fa-car"></i>Vehicle
             </Link>
           </li>
-          {/* <li>
-            <Link className="NavLinks" to="/Admin/Product">
-              <i className="fas fa-bag-shopping"></i>Product
-            </Link>
-          </li> */}
           <li>
             <Link className="NavLinks" to="/AdminBooking">
               <i className="fas fa-list"></i>Bookings
@@ -47,11 +41,6 @@ const Navbar = () => {
               <i className="fas fa-users"></i>Vendors
             </Link>
           </li>
-          {/* <li>
-            <Link className="NavLinks" to="/AdminCheckout">
-              <i className="fas fa-cart-shopping"></i>Cart
-            </Link>
-          </li> */}
         </ul>
 
         <div className="corner-menu">

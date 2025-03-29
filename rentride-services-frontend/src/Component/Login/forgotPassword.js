@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { FaLock } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const {
@@ -11,8 +12,6 @@ const ForgotPassword = () => {
     formState: { errors },
   } = useForm();
 
-  const navigate = useNavigate();
-
   const submitAlbum = async (data) => {
     try {
       const response = await fetch("http://localhost:8081/passwordReset", {
@@ -20,6 +19,8 @@ const ForgotPassword = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
+      toast.success("Check your email for password reset!");
 
       reset();
     } catch (error) {

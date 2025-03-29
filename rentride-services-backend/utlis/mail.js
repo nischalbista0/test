@@ -1,14 +1,13 @@
 const nodemailer = require("nodemailer");
 
-const sendBookingMail = (body) => {
-  const email_client = "hoxogo9247@otemdi.com";
+const sendBookingMail = (userEmail, body) => {
+  const email_client = userEmail;
   const model = body.model;
-  const days = body.days;
   const price = body.price;
   const email_host = "rajbhandarisanjina3@gmail.com";
+
   const transporter = nodemailer.createTransport({
-    port: 465,
-    host: "smtp.gmail.com",
+    service: "gmail",
     auth: {
       user: email_host,
       pass: process.env.GMAIL_PASS,
@@ -25,7 +24,6 @@ const sendBookingMail = (body) => {
     <p>The vehicle you have choose to book is booked successfull.
     Booking Details:
     Model: ${model}
-    For : ${days} days
     at Price : Rs ${price}/day
     </p>
 `,
@@ -38,11 +36,13 @@ const sendBookingMail = (body) => {
 };
 
 const sendPasswordResetMail = (token, email) => {
+  console.log("token", token);
+  console.log("email", email);
+
   const email_client = email;
   const email_host = "rajbhandarisanjina3@gmail.com";
   const transporter = nodemailer.createTransport({
-    port: 465,
-    host: "smtp.gmail.com",
+    service: "gmail",
     auth: {
       user: email_host,
       pass: process.env.GMAIL_PASS,
@@ -62,8 +62,14 @@ const sendPasswordResetMail = (token, email) => {
   };
 
   transporter.sendMail(mailData, function (err, info) {
-    if (err) console.log(err);
-    console.log(info, "Mail has been sent Successfully");
+    // if (err) console.log(err);
+    // console.log(info, "Mail has been sent Successfully");
+
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info, "Mail has been sent Successfully");
+    }
   });
 };
 

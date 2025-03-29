@@ -1,6 +1,5 @@
 const Vehicle = require("../models/vehicleModel");
 const errorHandler = require("../middlewares/error-handler");
-const multer = require("multer");
 
 let uploadedFilename;
 
@@ -19,15 +18,6 @@ exports.uploadVehicleImage = async (req, res, next) => {
     next(error);
   }
 };
-
-// exports.createVehicle = async (req, res, next) => {
-//   try {
-//     const vehicle = await Vehicle.create(req.body);
-//     return res.status(201).json(vehicle);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 exports.createVehicle = async (req, res, next) => {
   const { brand, model, power, Fuel, price, type, description } = req.body;
@@ -69,7 +59,6 @@ exports.createVehicle = async (req, res, next) => {
 
 exports.getVehicle = async (req, res, next) => {
   try {
-    //Fetch all products
     const vehicle = await Vehicle.find();
 
     if (!vehicle) {

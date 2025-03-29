@@ -1,11 +1,20 @@
 const Booking = require("../models/bookingModel");
 const errorHandler = require("../middlewares/error-handler");
-const multer = require("multer");
 const Vehicle = require("../models/vehicleModel");
+const jwt = require("jsonwebtoken");
 
 const sendBookingMail = require("../utlis/mail");
 
 exports.createBooking = async (req, res, next) => {
+  const accessTokenCookie = req.cookies["access_Token"];
+
+  let decodedToken;
+  if (accessTokenCookie) {
+    decodedToken = jwt.verify(accessTokenCookie, process.env.JWT_SECRET);
+  }
+
+  const userEmail = decodedToken.email;
+
   try {
     const booking = await Booking.create(req.body);
     await Vehicle.updateOne(
@@ -16,7 +25,8 @@ exports.createBooking = async (req, res, next) => {
         $set: { availability: false },
       }
     );
-    sendBookingMail(req.body);
+
+    sendBookingMail(userEmail, req.body);
 
     return res.status(201).json({ message: "Booking Created", booking });
   } catch (error) {
@@ -26,7 +36,6 @@ exports.createBooking = async (req, res, next) => {
 
 exports.fetchBooking = async (req, res, next) => {
   try {
-    //Fetch all products
     const Bookings = await Booking.find();
 
     if (!Bookings) {

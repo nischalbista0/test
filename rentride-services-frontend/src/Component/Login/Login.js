@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import "./Login.css";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import {
   signInStart,
   signInSuccess,
@@ -11,7 +11,6 @@ import {
 import { toast } from "react-toastify";
 
 function Login() {
-  const { user, loading, error } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
@@ -101,7 +100,9 @@ function Login() {
           </button>
 
           <div className="register-link">
-            <a onClick={() => navigate("/forgotP")}>Forgot Password?</a>
+            <a className="cursor-pointer" onClick={() => navigate("/forgotP")}>
+              Forgot Password?
+            </a>
             <p>
               Don't have an account?
               <a href="/registration"> Register</a>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "./Admin_Vehicle.css";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const AdminVehicle = () => {
-  const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
@@ -20,6 +19,11 @@ const AdminVehicle = () => {
   const [updateButton, setUpdateButton] = useState(false);
   const [showButton, setshowButton] = useState(false);
   const [vehicleId, setVehicleId] = useState("");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const vehiclesPerPage = 6;
 
   async function fetchVehicle() {
     try {
@@ -156,21 +160,44 @@ const AdminVehicle = () => {
   }
 
   // Delete a vehicle
-  async function remove(id) {
+  async function handleRemove() {
     try {
-      const response = await fetch(`http://localhost:8081/Vehicle/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8081/Vehicle/${selectedVehicleId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove vehicle");
+      }
+
       setVehicle((prevVehicleList) =>
-        prevVehicleList.filter((vehicle) => vehicle._id !== id)
+        prevVehicleList.filter((vehicle) => vehicle._id !== selectedVehicleId)
       );
+
+      toast.success("Vehicle removed successfully", { position: "top-right" });
+      setShowRemoveModal(false);
+      setSelectedVehicleId(null);
     } catch (error) {
       console.error(error);
+      toast.error("Error removing vehicle", { position: "top-right" });
     }
   }
+
+  // Get current vehicles for the current page
+  const indexOfLastVehicle = currentPage * vehiclesPerPage;
+  const indexOfFirstVehicle = indexOfLastVehicle - vehiclesPerPage;
+  const currentVehicles = vehicle.slice(
+    indexOfFirstVehicle,
+    indexOfLastVehicle
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="min-h-[calc(100vh-320px)]">
@@ -349,8 +376,8 @@ const AdminVehicle = () => {
       )}
 
       <div className="v-main">
-        {vehicle?.length > 0 ? (
-          vehicle.map((x) => (
+        {currentVehicles?.length > 0 ? (
+          currentVehicles.map((x) => (
             <div className="v-inner" key={x._id}>
               <div className="v-first">
                 <img
@@ -369,7 +396,10 @@ const AdminVehicle = () => {
                     UPDATE
                   </a>
                   <a
-                    onClick={() => remove(x._id)}
+                    onClick={() => {
+                      setSelectedVehicleId(x._id);
+                      setShowRemoveModal(true);
+                    }}
                     className="bg-red-500 cursor-pointer text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
                   >
                     REMOVE
@@ -411,6 +441,75 @@ const AdminVehicle = () => {
           </h1>
         )}
       </div>
+
+      <div className="pagination flex justify-center items-center gap-2 my-5">
+        <button
+          onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-indigo-500 text-white hover:bg-indigo-600"
+          }`}
+        >
+          <HiChevronLeft size={20} />
+        </button>
+
+        {Array.from(
+          { length: Math.ceil(vehicle.length / vehiclesPerPage) },
+          (_, i) => (
+            <button
+              key={i}
+              onClick={() => paginate(i + 1)}
+              className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+                currentPage === i + 1
+                  ? "bg-indigo-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {i + 1}
+            </button>
+          )
+        )}
+
+        <button
+          onClick={() =>
+            currentPage < Math.ceil(vehicle.length / vehiclesPerPage) &&
+            paginate(currentPage + 1)
+          }
+          disabled={currentPage === Math.ceil(vehicle.length / vehiclesPerPage)}
+          className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+            currentPage === Math.ceil(vehicle.length / vehiclesPerPage)
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-indigo-500 text-white hover:bg-indigo-600"
+          }`}
+        >
+          <HiChevronRight size={20} />
+        </button>
+      </div>
+
+      {showRemoveModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg w-96">
+            <h2 className="text-lg font-bold mb-3">Confirm Removal</h2>
+            <p>Are you sure you want to remove this vehicle?</p>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setShowRemoveModal(false)}
+                className="mr-3 px-4 py-2 bg-gray-300 text-black rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemove}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

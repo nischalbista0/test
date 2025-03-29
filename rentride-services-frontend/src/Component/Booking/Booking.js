@@ -10,7 +10,7 @@ import {
 } from "../../redux/user/reservationSlice";
 
 export default function Booking({ price, model, onClose, id }) {
-  const { user, loading, error } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
   const { reservationStatus } = useSelector((state) => state.reservation);
   const { paymentStatus } = useSelector((state) => state.payment);
 
@@ -21,7 +21,7 @@ export default function Booking({ price, model, onClose, id }) {
   const [contact, setContact] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
   const [description, setDescription] = useState("");
-  const [file, setFile] = useState(""); // Image file state, can be used for server-side upload
+  const [, setFile] = useState(""); // Image file state, can be used for server-side upload
   const [showPopup, setShowPopup] = useState(true);
   const [khalti, setKhalti] = useState(false);
 

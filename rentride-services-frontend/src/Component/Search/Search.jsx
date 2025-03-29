@@ -58,9 +58,6 @@ const Search = () => {
           </select>
         </div>
         <div className="v-main ">
-          <h1 className="text-5xl font-bold text-center text-white">
-            <b>Vehicles</b>
-          </h1>
           {filteredVehicles.map((vehicle, index) => (
             <div key={index} className="v-inner flex flex-col gap-4 flex-1">
               {vehicle.image && (

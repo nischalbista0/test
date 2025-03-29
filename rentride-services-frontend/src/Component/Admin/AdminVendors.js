@@ -12,6 +12,8 @@ const AdminVendors = () => {
     email: "",
     password: "",
   });
+  const [showModal, setShowModal] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState(null);
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -46,8 +48,6 @@ const AdminVendors = () => {
         toast.error("Vendor member already exists");
         return;
       }
-      // setVendors([...vendors, data]);
-      // setNewVendor({ name: "", email: "", password: "" });
       toast.success("Vendor added successfully!");
 
       window.location.reload();
@@ -56,10 +56,11 @@ const AdminVendors = () => {
     }
   };
 
-  const handleDeleteVendor = async (vendorId) => {
+  const handleDeleteVendor = async () => {
+    if (!selectedVendor) return;
     try {
       const response = await fetch(
-        `http://localhost:8081/deleteVendor/${vendorId}`,
+        `http://localhost:8081/deleteVendor/${selectedVendor._id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -67,13 +68,18 @@ const AdminVendors = () => {
       );
 
       if (response.ok) {
-        setVendors(vendors.filter((vendor) => vendor._id !== vendorId));
+        setVendors(
+          vendors.filter((vendor) => vendor._id !== selectedVendor._id)
+        );
         toast.success("Vendor deleted successfully!");
       } else {
         toast.error("Failed to delete vendor.");
       }
     } catch (error) {
       toast.error("Failed to delete vendor.");
+    } finally {
+      setShowModal(false);
+      setSelectedVendor(null);
     }
   };
 
@@ -184,7 +190,10 @@ const AdminVendors = () => {
                   >
                     <p className="text-gray-600 text-sm">{vendor.email}</p>
                     <button
-                      onClick={() => handleDeleteVendor(vendor._id)}
+                      onClick={() => {
+                        setSelectedVendor(vendor);
+                        setShowModal(true);
+                      }}
                       className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-300"
                     >
                       <FaTrashAlt />
@@ -200,6 +209,31 @@ const AdminVendors = () => {
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-xl font-semibold mb-4">
+              Are you sure you want to delete this vendor?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={handleDeleteVendor}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const Profile = () => {
-  const { user, loading, error } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
 
   const [responseData, setResponseData] = useState(null);
 
@@ -86,7 +86,13 @@ const Profile = () => {
           ) : (
             <div className="flex flex-col gap-4 mt-6">
               <p className="text-xl font-bold">You are not logged in!</p>
-              <p className="text-lg">Please <Link to="/login" className="text-blue-500 hover:underline">Login</Link> to continue!</p>
+              <p className="text-lg">
+                Please{" "}
+                <Link to="/login" className="text-blue-500 hover:underline">
+                  Login
+                </Link>{" "}
+                to continue!
+              </p>
             </div>
           )}
         </div>

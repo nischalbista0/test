@@ -18,6 +18,8 @@ router.get("/checkAdmin", validateAdmin(), (req, res) => {
   }
 });
 router.post("/passwordReset", userController.passwordReset);
+// Route for user Password Reset
+router.post("/resetPassword", userController.resetpassword);
 // Route for user change Password
 router.post("/changePassword", userController.changePassword);
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   payementFailure,
@@ -10,6 +10,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Success = () => {
+  const { user } = useSelector((state) => state.user);
+  console.log(user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const searchParams = new URLSearchParams(window.location.search);
@@ -35,8 +37,6 @@ const Success = () => {
           });
           if (purpose === "vehicle") {
             navigate("/Booking");
-          } else if (purpose === "product") {
-            navigate("/cart");
           }
         } else {
           dispatch(payementFailure());

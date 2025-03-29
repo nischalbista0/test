@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Booking = require("../controllers/booking"); // Import the booking controller
-const validateToken = require("../middlewares/validateToken");
+const Booking = require("../controllers/booking");
 
 // Example route definition
 router.post("/createBooking", Booking.createBooking);

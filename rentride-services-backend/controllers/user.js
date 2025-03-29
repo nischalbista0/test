@@ -11,6 +11,7 @@ const {
 } = require("../utlis/authenticate");
 const jwt = require("jsonwebtoken");
 const sendPasswordResetMail = require("../utlis/mail");
+const nodemailer = require("nodemailer");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -87,7 +88,11 @@ exports.login = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { id: user._id.toString(), role: user.role.toString() },
+      {
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role.toString(),
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -148,8 +153,65 @@ exports.passwordReset = async (req, res, next) => {
   if (!user) return res.sendStatus(401);
   const passwordResetToken = getPasswordResetToken({ _id: user._id });
 
-  sendPasswordResetMail(passwordResetToken, email);
+  console.log(passwordResetToken);
+  console.log(email);
+
+  // sendPasswordResetMail(passwordResetToken, email);
+  const email_client = email;
+  const email_host = "rajbhandarisanjina3@gmail.com";
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: email_host,
+      pass: process.env.GMAIL_PASS,
+    },
+    secure: true,
+  });
+
+  const mailData = {
+    from: email_host,
+    to: email_client,
+    subject: "Reset Password",
+    text: "Change your password",
+    html: `
+      <p>Click on the button below to change your password:</p>
+      <a href="http://localhost:3000/resetForm?token=${passwordResetToken}&email=${email_client}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">Reset Password</a>
+  `,
+  };
+
+  transporter.sendMail(mailData, function (err, info) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(info, "Mail has been sent Successfully");
+    }
+  });
+
   res.status(200).json({ message: "Message sent" });
+};
+
+exports.resetpassword = async (req, res, next) => {
+  const email = req.body.email;
+  const hashedPassword = bcryptjs.hashSync(req.body.newPassword, 12);
+
+  try {
+    const user = await User.findOne({ email: email });
+
+    console.log(user);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    user.password = hashedPassword;
+    await user.save();
+
+    // Respond with success status and message after password reset completes
+    return res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+  // });
 };
 
 //change when you know old password
