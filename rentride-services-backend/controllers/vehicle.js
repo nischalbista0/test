@@ -149,3 +149,40 @@ exports.addReview = async (req, res, next) => {
     next(err);
   }
 };
+
+// Add Rating to Vehicle
+exports.addRating = async (req, res, next) => {
+  try {
+    const { vehicleId, rating } = req.body;
+
+    // Validate the rating (it must be a number between 1 and 5)
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
+
+    // Find the vehicle by its ID
+    const vehicle = await Vehicle.findById(vehicleId);
+    if (!vehicle) {
+      const error = new Error("Vehicle not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Update the vehicle's rating (you could average previous ratings if needed)
+    vehicle.rating = rating;
+
+    // Save the updated vehicle
+    await vehicle.save();
+
+    // Send response
+    res.status(200).json({
+      message: "Vehicle rating has been updated.",
+      rating: vehicle.rating,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};

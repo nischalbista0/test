@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/createVehicle", Vehicle.createVehicle);
 router.post("/uploadVehicleImage", uploads, Vehicle.uploadVehicleImage);
 router.post("/addReviewV", Vehicle.addReview);
+router.post("/addRating", Vehicle.addRating);
 
 // Fetch all Vehicle
 router.get("/admin/getVehicle", Vehicle.getVehicle);
