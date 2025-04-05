@@ -20,9 +20,11 @@
     "react-router-dom": "^6.17.0",
     "react-router-hash-link": "^2.4.3",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.30.3",
     "react-toast": "^1.0.3",
     "react-toastify": "^10.0.5",
     "redux-persist": "^6.0.0",
+    "slick-carousel": "^1.8.1",
     "universal-cookie": "^7.1.0",
     "uuid": "^9.0.1",
     "web-vitals": "^2.1.4"

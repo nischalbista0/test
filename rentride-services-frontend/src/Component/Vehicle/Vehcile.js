@@ -13,6 +13,7 @@ const Vehicle = () => {
   const user = useSelector((state) => state.user.user);
   const [page, setPage] = useState(1);
   const [review, setReview] = useState(false);
+  const [rating, setRating] = useState(0);
   const [reserve, setReserve] = useState();
 
   const [vehicle, setVehicle] = useState("");
@@ -119,6 +120,34 @@ const Vehicle = () => {
     setReview(false); // Reset review state to false
     setBook(false); // Reset book state to false
   }
+
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      toast.error("Please select a rating", { position: "top-right" });
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8081/addReview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vehicleId, rating, reviewText: "Review" }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Review submitted successfully", {
+          position: "top-right",
+        });
+        setReview(false);
+        fetchVehicle(); // Refresh the vehicle data
+      } else {
+        toast.error("Failed to submit review", { position: "top-right" });
+      }
+    } catch (error) {
+      toast.error("Error submitting review", { position: "top-right" });
+    }
+  };
 
   // Filtering logic
   useEffect(() => {
@@ -233,7 +262,12 @@ const Vehicle = () => {
       </div>
       <div className="v-main ">
         {review && (
-          <Review2 vehicleId={vehicleId} onClose={handleCloseBooking} />
+          <Review2
+            vehicleId={vehicleId}
+            onClose={handleCloseBooking}
+            rating={rating}
+            setRating={setRating}
+          />
         )}
         {book &&
           (user ? (
@@ -318,7 +352,37 @@ const Vehicle = () => {
                   Review
                 </button>
                 <br />
-                <br />
+                {x.rating && (
+                  <div>
+                    <b>Rating: </b>
+                    <div className="flex">
+                      {[...Array(x.rating)].map((_, index) => (
+                        <svg
+                          key={index}
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="yellow"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="w-6 h-6 cursor-pointer"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                      {[...Array(5 - x.rating)].map((_, index) => (
+                        <svg
+                          key={index}
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="gray"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="w-6 h-6 cursor-pointer"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <b>Review: </b>
                   <ul>
