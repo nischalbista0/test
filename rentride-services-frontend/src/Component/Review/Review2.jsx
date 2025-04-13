@@ -57,6 +57,7 @@ const Review2 = ({ vehicleId, onClose, rating, setRating }) => {
 
         if (ratingResponse.ok) {
           toast.success("Review and rating submitted successfully!");
+          window.location.reload();
         } else {
           toast.error(ratingResult.message || "Failed to submit rating.");
         }
@@ -103,7 +104,7 @@ const Review2 = ({ vehicleId, onClose, rating, setRating }) => {
                   fill={index < rating ? "yellow" : "gray"}
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  className="w-6 h-6 cursor-pointer"
+                  className="w-6 h-6"
                 >
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                 </svg>

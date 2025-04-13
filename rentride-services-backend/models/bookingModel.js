@@ -2,6 +2,11 @@ const { Schema, model, default: mongoose } = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -18,12 +23,10 @@ const bookingSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
     checkOutDate: {
       type: Date,
       required: true,
     },
-
     price: {
       type: Number,
       required: true,
@@ -32,7 +35,6 @@ const bookingSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
-
     vehicleId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -40,6 +42,11 @@ const bookingSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ["active", "cancelled", "completed"],
+      default: "active",
     },
   },
   { timestamps: true }

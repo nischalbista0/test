@@ -13,11 +13,10 @@ import { fromLonLat, toLonLat } from "ol/proj";
 import { defaults as defaultControls } from "ol/control";
 
 function Registration() {
-  const [name, setName] = useState("");
+  const [userName, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [locationSelected, setLocationSelected] = useState(false);
@@ -29,7 +28,7 @@ function Registration() {
     const initialCoords = fromLonLat([
       longitude || 85.324,
       latitude || 27.7172,
-    ]); // Default: Kathmandu
+    ]);
 
     const map = new Map({
       target: mapRef.current,
@@ -45,7 +44,6 @@ function Registration() {
       }),
     });
 
-    // Handle user map click
     map.on("click", function (evt) {
       const coords = toLonLat(evt.coordinate);
       setLongitude(coords[0]);
@@ -53,7 +51,6 @@ function Registration() {
       setLocationSelected(true);
     });
 
-    // If no user interaction yet, pre-select Kathmandu
     if (!locationSelected && latitude === null && longitude === null) {
       setLatitude(27.7172);
       setLongitude(85.324);
@@ -63,54 +60,65 @@ function Registration() {
     return () => map.setTarget(null);
   }, [latitude, longitude]);
 
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
     if (!latitude || !longitude) {
       toast.error("Location not selected");
       return;
     }
 
-    const userData = {
-      name,
+    const newVendor = {
+      userName,
       email,
       password,
-      confirmPassword,
       latitude,
       longitude,
     };
 
     try {
-      const response = await fetch("http://localhost:8081/signup", {
+      const response = await fetch("http://localhost:8081/addVendor", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(newVendor),
       });
 
       const data = await response.json();
-      toast.success("Registration Successful");
-      setMessage(data.message);
-      if (response.ok) navigate("/");
+
+      console.log(data);
+
+      if (data.message === "Vendor member already exists") {
+        toast.error("Vendor member already exists");
+        return;
+      }
+
+      toast.success("Vendor added successfully!");
+      navigate("/login"); // Redirect to login or dashboard
     } catch (error) {
-      toast.error("Registration error");
+      toast.error("Failed to add vendor.");
       console.error(error);
     }
-  }
+  };
 
   return (
     <div className="main-wrapper">
       <div className="wrapper">
-        <h1 className="font-semibold">Create Account</h1>
-        <h2 className="text-yellow-500">{message}</h2>
+        <h1 className="font-semibold">Vendor Registration</h1>
         <form onSubmit={handleSubmit}>
           <div className="input-box">
             <input
               placeholder="Name"
               className="border p-3 rounded-lg"
               type="text"
-              value={name}
+              value={userName}
               required
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <FaUser className="icon" />
           </div>
@@ -163,7 +171,7 @@ function Registration() {
           </div>
 
           <button className="change" type="submit">
-            Create Account
+            Register as Vendor
           </button>
 
           <div className="register-link">

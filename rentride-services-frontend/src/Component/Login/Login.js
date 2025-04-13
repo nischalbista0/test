@@ -107,6 +107,11 @@ function Login() {
               Don't have an account?
               <a href="/registration"> Register</a>
             </p>
+            <hr className="my-2" />
+            <p>
+              Are you a vendor?
+              <a href="/VendorRegistration"> Vendor Registration</a>
+            </p>
           </div>
         </form>
       </div>

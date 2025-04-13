@@ -33,12 +33,10 @@ router.get("/getDashboard", userController.getDashboardSummary);
 
 router.get("/getVendors", userController.getVendors);
 
-router.post("/addVendor", validateAdmin(), userController.addVendor);
+router.post("/addVendor", userController.addVendor);
 
-router.delete(
-  "/deleteVendor/:vendorId",
-  validateAdmin(),
-  userController.deleteVendor
-);
+router.delete("/deleteVendor/:vendorId", userController.deleteVendor);
+
+router.put("/approveVendor/:vendorId", userController.approveVendor);
 
 module.exports = router;

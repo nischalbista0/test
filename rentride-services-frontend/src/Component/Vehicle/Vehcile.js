@@ -31,6 +31,8 @@ const Vehicle = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState("");
 
+  const [nextAvailableDates, setNextAvailableDates] = useState({});
+
   const itemsPerPage = 6;
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -76,11 +78,32 @@ const Vehicle = () => {
         credentials: "include",
       });
       const responseData = await response.json();
-      setReserve(responseData.Bookings);
+      const bookings = responseData.Bookings;
+
+      console.log(bookings);
+
+      setReserve(bookings);
+
+      const availabilityMap = {};
+
+      bookings.forEach((booking) => {
+        const { vehicleId, checkOutDate } = booking;
+        const checkout = new Date(checkOutDate);
+
+        if (
+          !availabilityMap[vehicleId] ||
+          checkout > new Date(availabilityMap[vehicleId])
+        ) {
+          availabilityMap[vehicleId] = checkout.toISOString().split("T")[0]; // keep only date part
+        }
+      });
+
+      setNextAvailableDates(availabilityMap);
     } catch (error) {
       console.error(error);
     }
   }
+
   const prevReserve = reserve?.filter(
     (reserve) => reserve.email === user?.rest?.email
   );
@@ -117,37 +140,9 @@ const Vehicle = () => {
 
   // Function to handle closing of the Booking or Review component
   function handleCloseBooking() {
-    setReview(false); // Reset review state to false
-    setBook(false); // Reset book state to false
+    setReview(false);
+    setBook(false);
   }
-
-  const handleSubmitReview = async () => {
-    if (rating === 0) {
-      toast.error("Please select a rating", { position: "top-right" });
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:8081/addReview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vehicleId, rating, reviewText: "Review" }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Review submitted successfully", {
-          position: "top-right",
-        });
-        setReview(false);
-        fetchVehicle(); // Refresh the vehicle data
-      } else {
-        toast.error("Failed to submit review", { position: "top-right" });
-      }
-    } catch (error) {
-      toast.error("Error submitting review", { position: "top-right" });
-    }
-  };
 
   // Filtering logic
   useEffect(() => {
@@ -183,6 +178,22 @@ const Vehicle = () => {
     availabilityFilter,
     vehicle,
   ]);
+
+  // Helper to calculate distance between two coordinates
+  function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of Earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance.toFixed(2); // returns value in km
+  }
 
   return (
     <>
@@ -281,119 +292,175 @@ const Vehicle = () => {
             <Navigate to="/login" />
           ))}
         {filteredVehicles.length ? (
-          filteredVehicles.slice(startIndex, endIndex).map((x) => (
-            <div className="v-inner flex flex-col gap-4 flex-1" key={x._id}>
-              <div className="v-first">
-                <img
-                  src={`http://localhost:8081/uploads/${x.image}`}
-                  alt={x.brand}
-                />
+          filteredVehicles.slice(startIndex, endIndex).map((x) => {
+            const userLat = user?.rest?.geoLocation?.ll[0];
+            const userLng = user?.rest?.geoLocation?.ll[1];
+            const vehicleLat = x?.geoLocation?.ll[0];
+            const vehicleLng = x?.geoLocation?.ll[1];
 
-                {x.availability ? (
-                  <div className="text-center my-6">
-                    <button
-                      onClick={() => {
-                        setBook(true);
-                        setPrice(x.price);
-                        setModel(x.model);
-                        setId(x._id);
-                      }}
-                      className="bg-black text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl "
-                    >
-                      Book Now
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center my-6">
-                    <div className="w-fit text-white font-bold bg-red-400 py-1 px-2 rounded-xl">
-                      Not Available
+            console.log(userLat, userLng, vehicleLat, vehicleLng);
+
+            const distance =
+              userLat && userLng && vehicleLat && vehicleLng
+                ? getDistanceFromLatLonInKm(
+                    userLat,
+                    userLng,
+                    vehicleLat,
+                    vehicleLng
+                  )
+                : null;
+
+            return (
+              <div className="v-inner flex flex-col gap-4 flex-1" key={x._id}>
+                <div className="v-first">
+                  <img
+                    src={`http://localhost:8081/uploads/${x.image}`}
+                    alt={x.brand}
+                  />
+
+                  {!x.availability ? (
+                    <div className="flex items-center justify-center my-6">
+                      <div className="w-fit bg-yellow-100 text-gray-800 font-medium py-3 px-5 rounded-2xl shadow-lg border border-yellow-300">
+                        <span className="mr-1">Available after:</span>
+                        <span className="font-semibold text-red-600">
+                          {nextAvailableDates[x._id] || "Currently Unavailable"}
+                        </span>
+                      </div>
                     </div>
+                  ) : (
+                    <div className="text-center my-6">
+                      <button
+                        onClick={() => {
+                          setBook(true);
+                          setPrice(x.price);
+                          setModel(x.model);
+                          setId(x._id);
+                        }}
+                        className="bg-black text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl "
+                      >
+                        Book Now
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="v-second">
+                  <h3 className="text-xl font-bold text-center">{x.model}</h3>
+                  <br />
+
+                  <p>
+                    <b>Brand: </b>
+                    {x.brand}
+                  </p>
+
+                  <p>
+                    <b>Type: </b> {x.type}
+                  </p>
+
+                  <p>
+                    <b>Power: </b> {x.power}
+                  </p>
+
+                  <p>
+                    <b>Fuel: </b> {x.Fuel}
+                  </p>
+                  <p>
+                    <b>Price/Per day: RS </b> {x.price}
+                  </p>
+                  <div className="text-sm text-gray-700 font-semibold mt-2">
+                    {distance ? (
+                      <>
+                        📍 <span className="font-semibold">{distance} km</span>{" "}
+                        away from you
+                      </>
+                    ) : (
+                      "Location not available"
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="v-second">
-                <h3 className="text-xl font-bold text-center">{x.model}</h3>
-                <br />
+                  <br />
 
-                <p>
-                  <b>Brand: </b>
-                  {x.brand}
-                </p>
+                  {reserve?.find((reserve) => reserve.vehicleId === x._id) && (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleReview(x._id);
+                        }}
+                        className=" bg-black mb-2 text-white border-2 border-gray-500 hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
+                      >
+                        Add Review
+                      </button>
+                    </>
+                  )}
 
-                <p>
-                  <b>Type: </b> {x.type}
-                </p>
+                  {typeof x.ratings !== "undefined" && x.ratings.length > 0 && (
+                    <div className="my-2">
+                      <b>Rating: </b>
+                      <div className="flex">
+                        {/* Calculate the average rating */}
+                        {(() => {
+                          const averageRating =
+                            x.ratings.reduce(
+                              (sum, rating) => sum + rating.rating,
+                              0
+                            ) / x.ratings.length;
 
-                <p>
-                  <b>Power: </b> {x.power}
-                </p>
+                          // Round to nearest whole number
+                          const roundedRating = Math.round(averageRating);
 
-                <p>
-                  <b>Fuel: </b> {x.Fuel}
-                </p>
-                <p>
-                  <b>Price/Per day: RS </b> {x.price}
-                </p>
-                <p>
-                  <b>Description: </b> {x.description}
-                </p>
-                <p>
-                  <b>Status: </b>{" "}
-                  {x.availability ? "Available" : "Not Available"}
-                </p>
-                <br />
+                          return (
+                            <>
+                              {[...Array(roundedRating)].map((_, index) => (
+                                <svg
+                                  key={index}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="yellow"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  className="w-6 h-6"
+                                >
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              ))}
+                              {[...Array(5 - roundedRating)].map((_, index) => (
+                                <svg
+                                  key={index}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="gray"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  className="w-6 h-6"
+                                >
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              ))}
+                            </>
+                          );
+                        })()}
 
-                <button
-                  onClick={() => {
-                    handleReview(x._id);
-                  }}
-                  className=" bg-black text-white border-2 border-gray-500 hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
-                >
-                  Review
-                </button>
-                <br />
-                {x.rating && (
+                        <span className="ml-2 text-gray-600">
+                          ({x.ratings.length} reviews)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <b>Rating: </b>
-                    <div className="flex">
-                      {[...Array(x.rating)].map((_, index) => (
-                        <svg
-                          key={index}
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="yellow"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="w-6 h-6 cursor-pointer"
-                        >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                      {[...Array(5 - x.rating)].map((_, index) => (
-                        <svg
-                          key={index}
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="gray"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          className="w-6 h-6 cursor-pointer"
-                        >
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      ))}
-                    </div>
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Customer Reviews:
+                    </h4>
+                    {x.review && x.review.length > 0 ? (
+                      x.review.map((rev, index) => (
+                        <div key={index} className="flex items-center mb-2">
+                          <span className="text-sm text-gray-600">- {rev}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">No reviews yet.</p>
+                    )}
                   </div>
-                )}
-                <div>
-                  <b>Review: </b>
-                  <ul>
-                    {x.review.map((s, index) => (
-                      <li key={index}> • {s}</li>
-                    ))}
-                  </ul>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="w-full col-span-2 font-bold text-black text-center text-lg">
             No vehicle found

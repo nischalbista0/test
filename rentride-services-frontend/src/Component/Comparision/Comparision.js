@@ -89,7 +89,10 @@ const Comparision = () => {
             {vehicle1 && (
               <div className="v-inner">
                 <div className="v-first">
-                  <img src={vehicle1.image} alt={vehicle1.brand} />
+                  <img
+                    src={`http://localhost:8081/uploads/${vehicle1.image}`}
+                    alt={vehicle1.brand}
+                  />
                 </div>
                 <div className="v-second">
                   <h3 className="text-xl font-bold text-center">
@@ -152,7 +155,10 @@ const Comparision = () => {
             {vehicle2 && (
               <div className="v-inner">
                 <div className="v-first">
-                  <img src={vehicle2.image} alt={vehicle2.brand} />
+                  <img
+                    src={`http://localhost:8081/uploads/${vehicle2.image}`}
+                    alt={vehicle2.brand}
+                  />
                 </div>
                 <div className="v-second">
                   <h3 className="text-xl font-bold text-center">

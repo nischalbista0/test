@@ -14,7 +14,7 @@ const User = new Schema(
   {
     email: {
       type: String,
-      unique: true, // Ensure email is unique
+      unique: true,
       required: true,
     },
     role: {
@@ -31,9 +31,19 @@ const User = new Schema(
     refreshToken: {
       type: [Session],
     },
+    // 👉 GeoIP-based location fields
+    geoLocation: {
+      ll: {
+        type: [Number], // [latitude, longitude]
+      },
+    },
+    approved: {
+      type: String,
+      default: "pending",
+    },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields automatically
+    timestamps: true,
   }
 );
 
@@ -46,15 +56,15 @@ const createAdminUser = async () => {
   const adminPassword = process.env.ADMIN_PASSWORD || "admin";
   const adminUserName = process.env.ADMIN_USER_NAME || "Admin";
 
-  // Check if the admin already exists
   const adminExists = await UserModel.findOne({ email: adminEmail });
 
   if (!adminExists) {
-    // If admin does not exist, create a new one
+    const hashedPassword = bcrypt.hashSync(adminPassword, 10);
+
     const newAdmin = new UserModel({
       email: adminEmail,
       userName: adminUserName,
-      password: adminPassword,
+      password: hashedPassword,
       role: "admin",
     });
 
@@ -65,7 +75,6 @@ const createAdminUser = async () => {
   }
 };
 
-// Call the function to create the admin on startup
 createAdminUser();
 
 module.exports = UserModel;

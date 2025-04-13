@@ -17,6 +17,7 @@ exports.khaltiApi = async (req, res) => {
         body: JSON.stringify(payload),
       }
     );
+    console.log(response);
     const responseData = await response.json();
     return res.status(201).json(responseData);
   } catch (error) {

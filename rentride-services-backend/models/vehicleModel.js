@@ -2,6 +2,11 @@ const { Schema, model, default: mongoose } = require("mongoose");
 
 const vehicleSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     brand: {
       type: String,
       required: true,
@@ -41,14 +46,22 @@ const vehicleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      default: 1,
+    ratings: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        rating: { type: Number, min: 1, max: 5 },
+      },
+    ],
+    geoLocation: {
+      ll: {
+        type: [Number], // [latitude, longitude]
+      },
     },
   },
   { timestamps: true }
 );
+
+// Enable geospatial indexing on the location field
+vehicleSchema.index({ location: "2dsphere" });
 
 module.exports = model("Vehicle", vehicleSchema);

@@ -47,6 +47,5 @@ mongoose
     app.listen(process.env.PORT || 8081, () => {
       console.log(`Listening to PORT : ${process.env.PORT}`);
     });
-    availabilityUpdate();
   })
   .catch((error) => console.log(error));

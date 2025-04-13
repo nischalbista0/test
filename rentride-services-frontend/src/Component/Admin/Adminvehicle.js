@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminNav from "./AdminNav";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./Admin_Vehicle.css";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import "ol/ol.css";
+import Map from "ol/Map";
+import View from "ol/View";
+import TileLayer from "ol/layer/Tile";
+import OSM from "ol/source/OSM";
+import { fromLonLat, toLonLat } from "ol/proj";
+import { defaults as defaultControls } from "ol/control";
 
 const AdminVehicle = () => {
   const navigate = useNavigate();
@@ -24,6 +31,64 @@ const AdminVehicle = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const vehiclesPerPage = 6;
+
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [locationSelected, setLocationSelected] = useState(false);
+
+  useEffect(() => {
+    if (!locationSelected) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            setLocationSelected(true);
+          },
+          (error) => {
+            console.warn(
+              "Location access denied or error occurred:",
+              error.message
+            );
+            // Don't update latitude/longitude — user denied access
+          }
+        );
+      } else {
+        console.warn("Geolocation not supported by this browser.");
+      }
+    }
+  }, []);
+
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (latitude === null || longitude === null) return;
+
+    const initialCoords = fromLonLat([longitude, latitude]);
+
+    const map = new Map({
+      target: mapRef.current,
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
+      controls: defaultControls({ attribution: false }),
+      view: new View({
+        center: initialCoords,
+        zoom: 13,
+      }),
+    });
+
+    map.on("click", function (evt) {
+      const coords = toLonLat(evt.coordinate);
+      setLongitude(coords[0]);
+      setLatitude(coords[1]);
+      setLocationSelected(true);
+    });
+
+    return () => map.setTarget(null);
+  }, [latitude, longitude]);
 
   async function fetchVehicle() {
     try {
@@ -102,6 +167,8 @@ const AdminVehicle = () => {
         type,
         description,
         image: uploadedFilename,
+        latitude,
+        longitude,
       };
 
       let response;
@@ -198,6 +265,8 @@ const AdminVehicle = () => {
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  console.log(longitude, latitude);
 
   return (
     <div className="min-h-[calc(100vh-320px)]">
@@ -339,6 +408,18 @@ const AdminVehicle = () => {
                   <span className="text-xs font-semibold">(Rs. / Day)</span>
                 </div>
               </div>
+
+              <p className="text-sm font-semibold mt-4">
+                Select Location on Map:
+              </p>
+              <div
+                ref={mapRef}
+                className="w-full h-64 border border-gray-400 rounded-md"
+              ></div>
+              <p className="text-sm text-gray-500">
+                Selected Location: {latitude?.toFixed(5)},{" "}
+                {longitude?.toFixed(5)}
+              </p>
             </div>
             <div className="flex flex-col flex-1 gap-4">
               <textarea

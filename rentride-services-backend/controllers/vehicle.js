@@ -1,5 +1,6 @@
 const Vehicle = require("../models/vehicleModel");
 const errorHandler = require("../middlewares/error-handler");
+const jwt = require("jsonwebtoken");
 
 let uploadedFilename;
 
@@ -24,7 +25,17 @@ exports.createVehicle = async (req, res, next) => {
 
   const image = uploadedFilename || "";
 
+  const accessTokenCookie = req.cookies["access_Token"];
+
+  let decodedToken;
+
   try {
+    if (accessTokenCookie) {
+      decodedToken = jwt.verify(accessTokenCookie, process.env.JWT_SECRET);
+    } else {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
     if (
       !brand ||
       !model ||
@@ -37,6 +48,16 @@ exports.createVehicle = async (req, res, next) => {
       return res.status(400).json({ error: "Please fill in all fields" });
     }
 
+    const userId = decodedToken.id;
+
+    // Parse latitude and longitude from request
+    const latitude = parseFloat(req.body.latitude);
+    const longitude = parseFloat(req.body.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({ message: "Invalid location coordinates." });
+    }
+
     const vehicleData = {
       brand,
       model,
@@ -46,6 +67,10 @@ exports.createVehicle = async (req, res, next) => {
       type,
       description,
       image,
+      userId,
+      geoLocation: {
+        ll: [latitude, longitude], // Store parsed latitude and longitude
+      },
     };
 
     const vechicle = await Vehicle.create(vehicleData);
@@ -153,7 +178,7 @@ exports.addReview = async (req, res, next) => {
 // Add Rating to Vehicle
 exports.addRating = async (req, res, next) => {
   try {
-    const { vehicleId, rating } = req.body;
+    const { vehicleId, rating, userId } = req.body;
 
     // Validate the rating (it must be a number between 1 and 5)
     if (rating < 1 || rating > 5) {
@@ -162,22 +187,37 @@ exports.addRating = async (req, res, next) => {
 
     // Find the vehicle by its ID
     const vehicle = await Vehicle.findById(vehicleId);
+    console.log(vehicle);
     if (!vehicle) {
       const error = new Error("Vehicle not found");
       error.statusCode = 404;
       throw error;
     }
 
-    // Update the vehicle's rating (you could average previous ratings if needed)
-    vehicle.rating = rating;
+    // Check if the user has already rated this vehicle
+    const existingRating = vehicle.ratings.find(
+      (r) => r._id.toString() === userId
+    );
+    if (existingRating) {
+      // If user already rated, update their rating
+      existingRating.rating = rating;
+    } else {
+      // If user hasn't rated, add new rating
+      vehicle.ratings.push({ userId, rating });
+    }
+
+    // Recalculate the average rating
+    const totalRatings = vehicle.ratings.reduce((sum, r) => sum + r.rating, 0);
+    const averageRating = totalRatings / vehicle.ratings.length;
 
     // Save the updated vehicle
+    vehicle.rating = averageRating; // Store the average rating
     await vehicle.save();
 
     // Send response
     res.status(200).json({
       message: "Vehicle rating has been updated.",
-      rating: vehicle.rating,
+      averageRating: vehicle.rating,
     });
   } catch (err) {
     if (!err.statusCode) {

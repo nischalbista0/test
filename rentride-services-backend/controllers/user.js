@@ -13,44 +13,52 @@ const jwt = require("jsonwebtoken");
 const sendPasswordResetMail = require("../utlis/mail");
 const nodemailer = require("nodemailer");
 
+const geoip = require("geoip-lite");
+
 exports.signup = async (req, res, next) => {
   try {
     const errors = validationResult(req);
-    //check if any error is present
     if (!errors.isEmpty()) {
       const errorMessage = errors.array()[0].msg;
       const error = new Error(errorMessage);
       error.statusCode = 422;
       throw error;
     }
-    const userexist = await User.findOne({ email: req.body.email });
 
-    if (userexist) {
-      res.status(500).json({
-        message: "Account Already Exists",
-      });
+    // Check if user already exists
+    const userExist = await User.findOne({ email: req.body.email });
+    if (userExist) {
+      res.status(500).json({ message: "Account Already Exists" });
       return;
     }
 
+    // Parse latitude and longitude from request
+    const latitude = parseFloat(req.body.latitude);
+    const longitude = parseFloat(req.body.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({ message: "Invalid location coordinates." });
+    }
+
+    // Hash the password
     const hashedPassword = bcryptjs.hashSync(req.body.password, 10);
-    // Create a new user and set its properties
+
+    // Create a new user
     const user = new User({
       userName: req.body.userName,
       email: req.body.email,
       password: hashedPassword,
+      geoLocation: {
+        ll: [latitude, longitude], // Store parsed latitude and longitude
+      },
     });
+
     const refreshToken = getRefreshToken({ _id: user._id });
 
     if (user) {
       user.refreshToken.push({ refreshToken });
-
-      // Save the user to the database
       await user.save();
-
-      res.status(201).json({
-        message: "Successful Registration",
-        user: user,
-      });
+      res.status(201).json({ message: "Successful Registration", user: user });
     }
   } catch (err) {
     if (!err.statusCode) {
@@ -332,11 +340,22 @@ exports.addVendor = async (req, res, next) => {
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
+    // Parse latitude and longitude from request
+    const latitude = parseFloat(req.body.latitude);
+    const longitude = parseFloat(req.body.longitude);
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({ message: "Invalid location coordinates." });
+    }
+
     const newVendor = new User({
       userName,
       email,
       password: hashedPassword,
       role: "vendor",
+      geoLocation: {
+        ll: [latitude, longitude], // Store parsed latitude and longitude
+      },
     });
 
     await newVendor.save();
@@ -363,5 +382,25 @@ exports.deleteVendor = async (req, res, next) => {
     res.status(200).json({ message: "Vendor deleted successfully" });
   } catch (error) {
     next(error);
+  }
+};
+
+// Approve Vendor Route
+exports.approveVendor = async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+
+    const vendor = await User.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    vendor.approved = "approved";
+    await vendor.save();
+
+    res.status(200).json({ message: "Vendor approved successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -9,21 +9,27 @@ exports.createBooking = async (req, res, next) => {
   const accessTokenCookie = req.cookies["access_Token"];
 
   let decodedToken;
-  if (accessTokenCookie) {
-    decodedToken = jwt.verify(accessTokenCookie, process.env.JWT_SECRET);
-  }
-
-  const userEmail = decodedToken.email;
-
   try {
-    const booking = await Booking.create(req.body);
+    if (accessTokenCookie) {
+      decodedToken = jwt.verify(accessTokenCookie, process.env.JWT_SECRET);
+    } else {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    const userEmail = decodedToken.email;
+    const userId = decodedToken.id;
+
+    const bookingData = {
+      ...req.body,
+      email: userEmail,
+      userId,
+    };
+
+    const booking = await Booking.create(bookingData);
+
     await Vehicle.updateOne(
-      {
-        _id: req.body.vehicleId,
-      },
-      {
-        $set: { availability: false },
-      }
+      { _id: req.body.vehicleId },
+      { $set: { availability: false } }
     );
 
     sendBookingMail(userEmail, req.body);
@@ -51,5 +57,35 @@ exports.fetchBooking = async (req, res, next) => {
       err.statusCode = 500;
     }
     next(err);
+  }
+};
+
+exports.cancelBooking = async (req, res, next) => {
+  const { id } = req.params;
+
+  console.log(id);
+
+  try {
+    const booking = await Booking.findById(id);
+
+    console.log(booking);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    // Mark booking as canceled
+    booking.status = "cancelled"; // Update status to 'Canceled'
+    await booking.save();
+
+    // Update vehicle availability back to true
+    await Vehicle.updateOne(
+      { _id: booking.vehicleId },
+      { $set: { availability: true } }
+    );
+
+    res.status(200).json({ message: "Booking canceled successfully." });
+  } catch (error) {
+    next(error);
   }
 };

@@ -54,6 +54,8 @@ const Profile = () => {
     }
   };
 
+  // console.log(user);
+
   return (
     <>
       <div className="main-wrapper">
@@ -68,12 +70,21 @@ const Profile = () => {
               </div>
               <br />
               <div>
+                {user.role === "user" && (
+                  <button
+                    className="change mb-4"
+                    onClick={() => navigate("/yourBookings")}
+                  >
+                    View Your Bookings
+                  </button>
+                )}
                 <button
                   className="change"
                   onClick={() => navigate("/changePassword")}
                 >
                   Change Password
                 </button>
+
                 <br />
                 <br />
                 {user && (

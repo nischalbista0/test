@@ -82,7 +82,7 @@ const Navbar = () => {
               <FaUser />
             </Link>
           ) : (
-            <Link to="/Registration">
+            <Link to="/login">
               <FaUser />
             </Link>
           )}

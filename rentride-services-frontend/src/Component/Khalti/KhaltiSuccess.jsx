@@ -16,6 +16,7 @@ const Success = () => {
   const dispatch = useDispatch();
   const searchParams = new URLSearchParams(window.location.search);
   const purpose = searchParams.get("purchase_order_name");
+
   useEffect(() => {
     const submitAlbum = async () => {
       try {

@@ -2,16 +2,11 @@ import React, { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaTrashAlt, FaUserPlus, FaUsers } from "react-icons/fa";
+import { FaCheck, FaCheckCircle, FaTrashAlt, FaUsers } from "react-icons/fa";
 
 const AdminVendors = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newVendor, setNewVendor] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
   const [showModal, setShowModal] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState(null);
 
@@ -33,26 +28,30 @@ const AdminVendors = () => {
     fetchVendors();
   }, []);
 
-  const handleAddVendor = async (e) => {
-    e.preventDefault();
+  const handleApproveVendor = async (vendorId) => {
     try {
-      const response = await fetch("http://localhost:8081/addVendor", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newVendor),
-      });
+      const response = await fetch(
+        `http://localhost:8081/approveVendor/${vendorId}`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
 
-      const data = await response.json();
-      if (data.message === "Vendor member already exists") {
-        toast.error("Vendor member already exists");
-        return;
+      if (response.ok) {
+        setVendors((prev) =>
+          prev.map((vendor) =>
+            vendor._id === vendorId
+              ? { ...vendor, approved: "approved" }
+              : vendor
+          )
+        );
+        toast.success("Vendor approved successfully!");
+      } else {
+        toast.error("Failed to approve vendor.");
       }
-      toast.success("Vendor added successfully!");
-
-      window.location.reload();
     } catch (error) {
-      toast.error("Failed to add vendor.");
+      toast.error("Failed to approve vendor.");
     }
   };
 
@@ -68,8 +67,8 @@ const AdminVendors = () => {
       );
 
       if (response.ok) {
-        setVendors(
-          vendors.filter((vendor) => vendor._id !== selectedVendor._id)
+        setVendors((prev) =>
+          prev.filter((vendor) => vendor._id !== selectedVendor._id)
         );
         toast.success("Vendor deleted successfully!");
       } else {
@@ -94,117 +93,76 @@ const AdminVendors = () => {
           </div>
         ) : (
           <>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">
-              Vendor Management
-            </h2>
-
-            {/* Add Vendor Form */}
-            <div className="mb-8 p-6 bg-white rounded-lg shadow-lg">
-              <h3 className="text-2xl font-semibold mb-6 flex items-center gap-3">
-                <FaUserPlus className="text-blue-500 text-3xl" /> Add New Vendor
-              </h3>
-
-              <form onSubmit={handleAddVendor} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="name"
-                      className="text-sm font-semibold text-gray-600 mb-2"
-                    >
-                      Username
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      placeholder="Enter Username"
-                      value={newVendor.name}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, name: e.target.value })
-                      }
-                      className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
-                      required
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <label
-                      htmlFor="email"
-                      className="text-sm font-semibold text-gray-600 mb-2"
-                    >
-                      Email Address
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      placeholder="Enter Email Address"
-                      value={newVendor.email}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, email: e.target.value })
-                      }
-                      className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-semibold text-gray-600 mb-2"
-                  >
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="Enter Password"
-                    value={newVendor.password}
-                    onChange={(e) =>
-                      setNewVendor({ ...newVendor, password: e.target.value })
-                    }
-                    className="border p-4 rounded-lg focus:ring-2 focus:ring-blue-300 outline-none transition duration-200"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300 focus:ring-2 focus:ring-blue-300"
-                >
-                  Add Vendor
-                </button>
-              </form>
-            </div>
-
             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <FaUsers className="text-blue-500" /> Vendor Members
             </h3>
 
-            {/* Vendor List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vendors && vendors.length > 0 ? (
-                vendors.map((vendor) => (
-                  <div
-                    key={vendor._id}
-                    className="p-5 bg-white rounded-lg shadow-lg flex flex-col items-center text-center relative"
-                  >
-                    <p className="text-gray-600 text-sm">{vendor.email}</p>
-                    <button
-                      onClick={() => {
-                        setSelectedVendor(vendor);
-                        setShowModal(true);
-                      }}
-                      className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-300"
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center w-full">
-                  No vendor members found.
-                </p>
-              )}
+            {/* Table for Vendor List */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto bg-white shadow-lg rounded-lg">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Name</th>
+                    <th className="px-4 py-2 text-left">Email</th>
+                    <th className="px-4 py-2 text-left">Approval Status</th>
+                    <th className="px-4 py-2 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vendors && vendors.length > 0 ? (
+                    vendors.map((vendor) => (
+                      <tr
+                        key={vendor._id}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="px-4 py-2">{vendor.userName}</td>
+                        <td className="px-4 py-2">{vendor.email}</td>
+                        <td className="px-4 py-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              vendor.approved === "approved"
+                                ? "bg-green-100 text-green-700"
+                                : vendor.approved === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }`}
+                          >
+                            {vendor.approved}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {vendor.approved !== "approved" && (
+                            <button
+                              onClick={() => handleApproveVendor(vendor._id)}
+                              className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition duration-300 mr-2"
+                            >
+                              <FaCheck />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setSelectedVendor(vendor);
+                              setShowModal(true);
+                            }}
+                            className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition duration-300"
+                          >
+                            <FaTrashAlt />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-4 py-2 text-center text-gray-500"
+                      >
+                        No vendor members found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </>
         )}

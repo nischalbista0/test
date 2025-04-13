@@ -22,6 +22,8 @@ import AdminDashboard from "./Component/Admin/AdminDashboard";
 import AdminVendors from "./Component/Admin/AdminVendors";
 import VendorBooking from "./Component/Vendors/VendorBooking";
 import VendorVehicle from "./Component/Vendors/VendorVehicle";
+import UserBookings from "./Component/profile/UserBookings";
+import VendorRegistration from "./Component/Registration/VendorRegistration";
 
 const App = () => {
   return (
@@ -29,12 +31,14 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/Registration" element={<Registration />} />
+        <Route path="/VendorRegistration" element={<VendorRegistration />} />
         <Route path="/" element={<Home />} />
         <Route path="/Vehicle" element={<Vehicle />} />
         <Route path="/forgotP" element={<ForgotPassword />} />
         <Route path="/resetForm" element={<ResetForm />} />
         <Route path="/compare" element={<Comparision />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/yourBookings" element={<UserBookings />} />
 
         {/* <Route element={<PrivateRoute />}> */}
         {/* <Route
