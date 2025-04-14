@@ -278,11 +278,13 @@ exports.getDashboardSummary = async (req, res) => {
     // New Metrics from Bookings
     const totalBookings = await Bookings.countDocuments();
     const totalRevenue = await Bookings.aggregate([
+      { $match: { status: { $ne: "cancelled" } } }, // Exclude cancelled bookings
       { $group: { _id: null, total: { $sum: "$price" } } },
     ]);
 
     const upcomingCheckouts = await Bookings.countDocuments({
       checkOutDate: { $gte: new Date() },
+      status: { $ne: "cancelled" },
     });
 
     const recentBookings = await Bookings.find()
