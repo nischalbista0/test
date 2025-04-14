@@ -1,9 +1,20 @@
 import React, { useEffect, useState } from "react";
 import AdminNav from "./AdminNav";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const { user } = useSelector((state) => state.user);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {

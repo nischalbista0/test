@@ -11,6 +11,9 @@ const UserBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+
   useEffect(() => {
     if (user === null) {
       navigate("/login");
@@ -38,20 +41,25 @@ const UserBookings = () => {
     if (user) fetchBookings();
   }, [user]);
 
-  const handleCancel = async (bookingId) => {
-    const confirmCancel = window.confirm("Cancel this booking?");
-    if (!confirmCancel) return;
+  const openCancelModal = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setShowModal(true);
+  };
 
+  const confirmCancel = async () => {
     try {
-      const res = await fetch(`http://localhost:8081/cancel/${bookingId}`, {
-        method: "PATCH",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `http://localhost:8081/cancel/${selectedBookingId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        }
+      );
 
       if (res.ok) {
         setBookings((prev) =>
           prev.map((b) =>
-            b._id === bookingId ? { ...b, status: "cancelled" } : b
+            b._id === selectedBookingId ? { ...b, status: "cancelled" } : b
           )
         );
         toast.success("Booking cancelled.");
@@ -61,6 +69,9 @@ const UserBookings = () => {
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.");
+    } finally {
+      setShowModal(false);
+      setSelectedBookingId(null);
     }
   };
 
@@ -188,7 +199,7 @@ const UserBookings = () => {
                   <td className="px-6 py-4 text-center">
                     {booking.status === "active" && (
                       <button
-                        onClick={() => handleCancel(booking._id)}
+                        onClick={() => openCancelModal(booking._id)}
                         className="text-red-600 font-medium hover:text-red-800 hover:underline transition"
                       >
                         Cancel
@@ -200,6 +211,33 @@ const UserBookings = () => {
             </tbody>
           </table>
         </div>
+
+        {showModal && (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Confirm Cancellation
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to cancel this booking?
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={confirmCancel}
+                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+                >
+                  Confirm Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,9 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "./Vendor_Vehicle.css";
 import VendorNav from "./VendorNav";
+import "ol/ol.css";
+import Map from "ol/Map";
+import View from "ol/View";
+import TileLayer from "ol/layer/Tile";
+import OSM from "ol/source/OSM";
+import { fromLonLat, toLonLat } from "ol/proj";
+import { defaults as defaultControls } from "ol/control";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
 const VendorVehicle = () => {
   const { user } = useSelector((state) => state.user);
@@ -22,6 +30,76 @@ const VendorVehicle = () => {
   const [vehicleId, setVehicleId] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const vehiclesPerPage = 6;
+
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [locationSelected, setLocationSelected] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!locationSelected) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            setLocationSelected(true);
+          },
+          (error) => {
+            console.warn("Location access denied:", error.message);
+            // 🗺️ Default to Kathmandu
+            setLatitude(27.7172);
+            setLongitude(85.324);
+            setLocationSelected(true);
+          }
+        );
+      } else {
+        console.warn("Geolocation not supported by this browser.");
+        setLatitude(27.7172);
+        setLongitude(85.324);
+        setLocationSelected(true);
+      }
+    }
+  }, []);
+
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    if (latitude === null || longitude === null || !mapRef.current) return;
+
+    const initialCoords = fromLonLat([longitude, latitude]);
+
+    const map = new Map({
+      target: mapRef.current,
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
+      controls: defaultControls({ attribution: false }),
+      view: new View({
+        center: initialCoords,
+        zoom: 13,
+      }),
+    });
+
+    map.on("click", function (evt) {
+      const coords = toLonLat(evt.coordinate);
+      setLongitude(coords[0]);
+      setLatitude(coords[1]);
+      setLocationSelected(true);
+    });
+
+    return () => map.setTarget(null);
+  }, [latitude, longitude, showButton]); // Add showButton here!
 
   async function fetchVehicle() {
     try {
@@ -100,6 +178,8 @@ const VendorVehicle = () => {
         type,
         description,
         image: uploadedFilename,
+        latitude,
+        longitude,
       };
 
       let response;
@@ -186,16 +266,39 @@ const VendorVehicle = () => {
     }
   }
 
+  // Get current vehicles for the current page
+  const indexOfLastVehicle = currentPage * vehiclesPerPage;
+  const indexOfFirstVehicle = indexOfLastVehicle - vehiclesPerPage;
+  const currentVehicles = vehicle.slice(
+    indexOfFirstVehicle,
+    indexOfLastVehicle
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="min-h-[calc(100vh-320px)]">
       <VendorNav />
       <div className="V-heading">
-        <button
-          onClick={() => setshowButton(true)}
-          className="mr-3 bg-white text-black border-4 border-black hover:bg-black hover:text-white hover:border-white font-bold py-1 px-2 rounded-xl "
-        >
-          <i className="fas fa-bag-shopping"></i> ADD
-        </button>
+        {user?.rest?.approved === "pending" ? (
+          <div className="flex flex-col items-center justify-center p-6 bg-yellow-50 border-l-4 border-yellow-500 text-gray-700 shadow-md rounded-md">
+            <h1 className="text-3xl font-semibold text-center my-3 text-yellow-800">
+              Your account is pending approval
+            </h1>
+            <p className="text-lg text-center my-2">
+              We are currently reviewing your account details. Once approved,
+              you'll be able to add vehicles.
+            </p>
+          </div>
+        ) : (
+          <button
+            onClick={() => setshowButton(true)}
+            className="mr-3 bg-white text-black border-4 border-black hover:bg-black hover:text-white hover:border-white font-bold py-1 px-2 rounded-xl "
+          >
+            <i className="fas fa-bag-shopping"></i> ADD
+          </button>
+        )}
       </div>
       {showButton ? (
         <main className="border border-black rounded-lg p-3 max-w-4xl mx-auto my-10">
@@ -326,6 +429,18 @@ const VendorVehicle = () => {
                   <span className="text-xs font-semibold">(Rs. / Day)</span>
                 </div>
               </div>
+
+              <p className="text-sm font-semibold mt-4">
+                Select Location on Map:
+              </p>
+              <div
+                ref={mapRef}
+                className="w-full h-64 border border-gray-400 rounded-md"
+              ></div>
+              <p className="text-sm text-gray-500">
+                Selected Location: {latitude?.toFixed(5)},{" "}
+                {longitude?.toFixed(5)}
+              </p>
             </div>
             <div className="flex flex-col flex-1 gap-4">
               <textarea
@@ -363,70 +478,127 @@ const VendorVehicle = () => {
       )}
 
       <div className="v-main">
-        {vehicle?.length > 0 ? (
-          vehicle.map((x) => (
-            <div className="v-inner" key={x._id}>
-              <div className="v-first">
-                <img
-                  src={`http://localhost:8081/uploads/${x.image}`}
-                  alt={x.brand}
-                />
-                <div className="text-center my-6">
-                  <a
-                    onClick={() => {
-                      setVehicleId(x._id);
-                      setshowButton(true);
-                      setUpdateButton(true);
-                    }}
-                    className=" bg-slate-800 cursor-pointer text-white border-2 border-white mr-2  hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
-                  >
-                    UPDATE
-                  </a>
-                  <a
-                    onClick={() => {
-                      setSelectedVehicleId(x._id);
-                      setShowRemoveModal(true);
-                    }}
-                    className="bg-red-500 cursor-pointer text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
-                  >
-                    REMOVE
-                  </a>
-                </div>
-              </div>
-              <div className="v-second">
-                <h3 className="text-xl font-bold text-center">{x.model}</h3>
-                <br />
+        {currentVehicles?.length > 0 ? (
+          currentVehicles.map(
+            (x) =>
+              x.userId === user?.rest?._id && (
+                <>
+                  <div className="v-inner" key={x._id}>
+                    <div className="v-first">
+                      <img
+                        src={`http://localhost:8081/uploads/${x.image}`}
+                        alt={x.brand}
+                      />
+                      <div className="text-center my-6">
+                        <a
+                          onClick={() => {
+                            setVehicleId(x._id);
+                            setshowButton(true);
+                            setUpdateButton(true);
+                          }}
+                          className=" bg-slate-800 cursor-pointer text-white border-2 border-white mr-2  hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
+                        >
+                          UPDATE
+                        </a>
+                        <a
+                          onClick={() => {
+                            setSelectedVehicleId(x._id);
+                            setShowRemoveModal(true);
+                          }}
+                          className="bg-red-500 cursor-pointer text-white border-2 border-white hover:bg-white hover:text-black hover:border-black font-bold py-1 px-2 rounded-xl"
+                        >
+                          REMOVE
+                        </a>
+                      </div>
+                    </div>
+                    <div className="v-second">
+                      <h3 className="text-xl font-bold text-center">
+                        {x.model}
+                      </h3>
+                      <br />
 
-                <p>
-                  <b>Brand: </b>
-                  {x.brand}
-                </p>
+                      <p>
+                        <b>Brand: </b>
+                        {x.brand}
+                      </p>
 
-                <p>
-                  <b>Type: </b> {x.type}
-                </p>
+                      <p>
+                        <b>Type: </b> {x.type}
+                      </p>
 
-                <p>
-                  <b>Power: </b> {x.power}
-                </p>
+                      <p>
+                        <b>Power: </b> {x.power}
+                      </p>
 
-                <p>
-                  <b>Fuel: </b> {x.Fuel}
-                </p>
-                <p>
-                  <b>Price/Per day: </b> {x.price}
-                </p>
-                <p>
-                  <b>Description: </b> {x.description}
-                </p>
-              </div>
-            </div>
-          ))
+                      <p>
+                        <b>Fuel: </b> {x.Fuel}
+                      </p>
+                      <p>
+                        <b>Price/Per day: </b> {x.price}
+                      </p>
+                      <p>
+                        <b>Description: </b> {x.description}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )
+          )
         ) : (
-          <h1 className="text-4xl font-semibold text-center">
-            No vehicles available
-          </h1>
+          <>
+            {user?.rest?.approved !== "pending" && (
+              <h1 className="text-4xl font-semibold text-center">
+                No vehicles available
+              </h1>
+            )}
+          </>
         )}
+      </div>
+
+      <div className="pagination flex justify-center items-center gap-2 my-5">
+        <button
+          onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+            currentPage === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-indigo-500 text-white hover:bg-indigo-600"
+          }`}
+        >
+          <HiChevronLeft size={20} />
+        </button>
+
+        {Array.from(
+          { length: Math.ceil(vehicle.length / vehiclesPerPage) },
+          (_, i) => (
+            <button
+              key={i}
+              onClick={() => paginate(i + 1)}
+              className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+                currentPage === i + 1
+                  ? "bg-indigo-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {i + 1}
+            </button>
+          )
+        )}
+
+        <button
+          onClick={() =>
+            currentPage < Math.ceil(vehicle.length / vehiclesPerPage) &&
+            paginate(currentPage + 1)
+          }
+          disabled={currentPage === Math.ceil(vehicle.length / vehiclesPerPage)}
+          className={`w-10 h-10 flex items-center justify-center rounded-full border transition ${
+            currentPage === Math.ceil(vehicle.length / vehiclesPerPage)
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-indigo-500 text-white hover:bg-indigo-600"
+          }`}
+        >
+          <HiChevronRight size={20} />
+        </button>
       </div>
 
       {showRemoveModal && (

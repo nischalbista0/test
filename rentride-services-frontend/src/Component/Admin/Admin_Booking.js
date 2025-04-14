@@ -1,16 +1,39 @@
 import React, { useEffect, useState } from "react";
-import AdminNav from "./AdminNav";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import AdminNav from "./AdminNav";
+import { useSelector } from "react-redux";
 
 export default function Admin_Booking() {
+  const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [vehicles, setVehicles] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [searchModel, setSearchModel] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [checkoutDate, setCheckoutDate] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user]);
+
+  async function fetchVehicle() {
+    try {
+      const response = await fetch("http://localhost:8081/getVehicle");
+      const responseData = await response.json();
+      const vehicles = responseData.vehicle;
+      // const filteredVehicles = vehicles.filter(
+      //   (vehicle) => vehicle.availability === true
+      // );
+      setVehicles(vehicles);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   async function fetchBookings() {
     try {
@@ -18,8 +41,19 @@ export default function Admin_Booking() {
         credentials: "include",
       });
       const responseData = await response.json();
-      setVehicles(responseData.Bookings);
-      setFilteredVehicles(responseData.Bookings);
+      const allBookings = responseData.Bookings;
+
+      // Match only bookings for vehicles owned by the current vendor
+      const vendorVehicleIds = vehicles
+        .filter((vehicle) => vehicle.userId === user.rest._id)
+        .map((vehicle) => vehicle._id); // get IDs of owned vehicles
+
+      const vendorBookings = allBookings.filter((booking) =>
+        vendorVehicleIds.includes(booking.vehicleId)
+      );
+
+      setBookings(vendorBookings); // Save filtered list for further filtering
+      setFilteredVehicles(vendorBookings); // Initially show all
     } catch (error) {
       toast.error("You are not admin", { position: "top-right" });
       navigate("/");
@@ -28,12 +62,18 @@ export default function Admin_Booking() {
   }
 
   useEffect(() => {
-    fetchBookings();
+    fetchVehicle(); // Fetch vehicles first
   }, []);
+
+  useEffect(() => {
+    if (vehicles.length > 0) {
+      fetchBookings(); // Only fetch bookings after vehicles are loaded
+    }
+  }, [vehicles]);
 
   // Filtering logic
   useEffect(() => {
-    let filtered = vehicles;
+    let filtered = bookings;
 
     if (searchModel) {
       filtered = filtered.filter((v) =>
@@ -55,7 +95,7 @@ export default function Admin_Booking() {
     }
 
     setFilteredVehicles(filtered);
-  }, [searchModel, minPrice, maxPrice, checkoutDate, vehicles]);
+  }, [searchModel, minPrice, maxPrice, checkoutDate, bookings]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -124,13 +164,13 @@ export default function Admin_Booking() {
                 <th className="p-4">Model</th>
                 <th className="p-4">Price/Day</th>
                 <th className="p-4">User</th>
-                <th className="p-4">Vehicle ID</th>
+                <th className="p-4">Status</th>
               </tr>
             </thead>
 
             {/* Table Body */}
             <tbody>
-              {filteredVehicles?.length > 0 ? (
+              {filteredVehicles.length > 0 ? (
                 filteredVehicles.map((vehicle, index) => (
                   <tr
                     key={index}
@@ -149,7 +189,17 @@ export default function Admin_Booking() {
                       Rs. {vehicle.price}
                     </td>
                     <td className="p-4">{vehicle.userName}</td>
-                    <td className="p-4">{vehicle.vehicleId}</td>
+                    <td className="p-4">
+                      {vehicle.status === "cancelled" ? (
+                        <span className="inline-block px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">
+                          Cancelled
+                        </span>
+                      ) : (
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                          Confirmed
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))
               ) : (

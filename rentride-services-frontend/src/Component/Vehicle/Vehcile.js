@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Review2 from "../Review/Review2";
+import { Link } from "react-router-dom";
 
 const Vehicle = () => {
   const user = useSelector((state) => state.user.user);
@@ -200,20 +201,20 @@ const Vehicle = () => {
       <Navbar />
       <div className="V-heading">
         <div>
-          <a
-            href="/Vehicle"
+          <Link
+            to="/Vehicle"
             className="mr-3 bg-white text-black border-4 border-black hover:bg-black hover:text-white hover:border-white font-bold py-1 px-2 rounded-xl "
           >
             <i className="fas fa-car"></i>Vehicle
-          </a>
+          </Link>
         </div>
         <div>
-          <a
-            href="/compare"
+          <Link
+            to="/compare"
             className="bg-white text-black border-4 border-black hover:bg-black hover:text-white hover:border-white font-bold py-1 px-2 rounded-xl "
           >
             <i className="fas fa-car"></i>Compare
-          </a>
+          </Link>
         </div>
       </div>
       {/* Filters */}
@@ -297,8 +298,6 @@ const Vehicle = () => {
             const userLng = user?.rest?.geoLocation?.ll[1];
             const vehicleLat = x?.geoLocation?.ll[0];
             const vehicleLng = x?.geoLocation?.ll[1];
-
-            console.log(userLat, userLng, vehicleLat, vehicleLng);
 
             const distance =
               userLat && userLng && vehicleLat && vehicleLng

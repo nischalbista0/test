@@ -2,15 +2,38 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import VendorNav from "./VendorNav";
+import { useSelector } from "react-redux";
 
 export default function VendorBooking() {
+  const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [vehicles, setVehicles] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [searchModel, setSearchModel] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [checkoutDate, setCheckoutDate] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user]);
+
+  async function fetchVehicle() {
+    try {
+      const response = await fetch("http://localhost:8081/getVehicle");
+      const responseData = await response.json();
+      const vehicles = responseData.vehicle;
+      // const filteredVehicles = vehicles.filter(
+      //   (vehicle) => vehicle.availability === true
+      // );
+      setVehicles(vehicles);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   async function fetchBookings() {
     try {
@@ -18,8 +41,19 @@ export default function VendorBooking() {
         credentials: "include",
       });
       const responseData = await response.json();
-      setVehicles(responseData.Bookings);
-      setFilteredVehicles(responseData.Bookings);
+      const allBookings = responseData.Bookings;
+
+      // Filter bookings to include only those where the vehicle belongs to this vendor
+      const vendorVehicleIds = vehicles
+        .filter((v) => v.vendorId === user.rest._id) // or v.owner === user.rest._id
+        .map((v) => v._id);
+
+      const filtered = allBookings.filter((booking) =>
+        vendorVehicleIds.includes(booking.vehicleId)
+      );
+
+      setBookings(filtered); // Use this for filtering
+      setFilteredVehicles(filtered); // Initially show all
     } catch (error) {
       toast.error("You are not admin", { position: "top-right" });
       navigate("/");
@@ -28,12 +62,13 @@ export default function VendorBooking() {
   }
 
   useEffect(() => {
+    fetchVehicle();
     fetchBookings();
   }, []);
 
   // Filtering logic
   useEffect(() => {
-    let filtered = vehicles;
+    let filtered = bookings;
 
     if (searchModel) {
       filtered = filtered.filter((v) =>
@@ -55,7 +90,7 @@ export default function VendorBooking() {
     }
 
     setFilteredVehicles(filtered);
-  }, [searchModel, minPrice, maxPrice, checkoutDate, vehicles]);
+  }, [searchModel, minPrice, maxPrice, checkoutDate, bookings]);
 
   return (
     <div className="min-h-screen bg-gray-100">
